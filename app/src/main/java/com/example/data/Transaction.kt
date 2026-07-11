@@ -14,5 +14,6 @@ data class Transaction(
     val amount: Double,
     val category: String,
     val description: String,
-    val dateMillis: Long
+    val dateMillis: Long,
+    val bookId: Int = 1
 )

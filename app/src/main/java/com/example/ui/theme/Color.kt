@@ -40,9 +40,9 @@ val DarkOnSurfaceVariant = Color(0xFFCAC4D0)
 val DarkOutline = Color(0xFF938F99)
 val DarkOutlineVariant = Color(0xFF49454F)
 
-val IncomeColorLight = Color(0xFF16A34A)
+val IncomeColorLight = Color(0xFF4ADE80)
 val IncomeBgLight = Color(0xFFDCFCE7)
-val ExpenseColorLight = Color(0xFFDC2626)
+val ExpenseColorLight = Color(0xFFF87171)
 val ExpenseBgLight = Color(0xFFFEE2E2)
 
 val IncomeColorDark = Color(0xFF4ADE80)

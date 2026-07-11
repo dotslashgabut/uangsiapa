@@ -10,14 +10,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM transactions ORDER BY dateMillis DESC")
-    fun getAllTransactions(): Flow<List<Transaction>>
+    @Query("SELECT * FROM transactions WHERE bookId = :bookId ORDER BY dateMillis DESC")
+    fun getAllTransactions(bookId: Int): Flow<List<Transaction>>
     
     @Query("SELECT * FROM transactions WHERE id = :id")
     suspend fun getTransactionById(id: Int): Transaction?
 
-    @Query("SELECT * FROM transactions WHERE dateMillis >= :startMillis AND dateMillis <= :endMillis ORDER BY dateMillis DESC")
-    fun getTransactionsBetween(startMillis: Long, endMillis: Long): Flow<List<Transaction>>
+    @Query("SELECT * FROM transactions WHERE bookId = :bookId AND dateMillis >= :startMillis AND dateMillis <= :endMillis ORDER BY dateMillis DESC")
+    fun getTransactionsBetween(bookId: Int, startMillis: Long, endMillis: Long): Flow<List<Transaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: Transaction)

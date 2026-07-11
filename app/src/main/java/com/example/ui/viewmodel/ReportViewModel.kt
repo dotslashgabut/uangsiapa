@@ -32,6 +32,12 @@ class ReportViewModel(private val repository: TransactionRepository) : ViewModel
     val uiState: StateFlow<ReportUiState> = _uiState.asStateFlow()
     
     private var loadJob: Job? = null
+    private var activeBookId: Int = 1
+
+    fun setBookId(bookId: Int) {
+        activeBookId = bookId
+        loadData()
+    }
 
     init {
         val calendar = Calendar.getInstance()
@@ -88,7 +94,7 @@ class ReportViewModel(private val repository: TransactionRepository) : ViewModel
         }
 
         loadJob = viewModelScope.launch {
-            repository.getTransactionsBetween(startMillis, endMillis).collectLatest { transactions ->
+            repository.getTransactionsBetween(activeBookId, startMillis, endMillis).collectLatest { transactions ->
                 val totalIncome = transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
                 val totalExpense = transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
                 _uiState.update { 

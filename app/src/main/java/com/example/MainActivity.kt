@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.screens.AddEditScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ReportScreen
@@ -34,10 +35,13 @@ import com.example.ui.viewmodel.ReportViewModelFactory
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val sharedPreferences = getSharedPreferences("theme_prefs", android.content.Context.MODE_PRIVATE)
         enableEdgeToEdge()
         setContent {
             val systemDark = isSystemInDarkTheme()
-            var isDarkTheme by remember { mutableStateOf(systemDark) }
+            var isDarkTheme by remember { 
+                mutableStateOf(sharedPreferences.getBoolean("is_dark_theme", systemDark)) 
+            }
             
             MyApplicationTheme(darkTheme = isDarkTheme) {
                 Surface(
@@ -46,7 +50,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MoneyTrackerAppUI(
                         isDarkTheme = isDarkTheme,
-                        onToggleTheme = { isDarkTheme = !isDarkTheme }
+                        onToggleTheme = { 
+                            val newValue = !isDarkTheme
+                            isDarkTheme = newValue
+                            sharedPreferences.edit().putBoolean("is_dark_theme", newValue).apply()
+                        }
                     )
                 }
             }
@@ -61,10 +69,11 @@ fun MoneyTrackerAppUI(
 ) {
     val navController = rememberNavController()
     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as MoneyTrackerApp
-    
+    val mainViewModel: MainViewModel = viewModel(factory = MainViewModelFactory(app.repository))
+    val activeBook by mainViewModel.activeBook.collectAsStateWithLifecycle()
+
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
-            val mainViewModel: MainViewModel = viewModel(factory = MainViewModelFactory(app.repository))
             HomeScreen(
                 viewModel = mainViewModel,
                 isDark = isDarkTheme,
@@ -93,6 +102,7 @@ fun MoneyTrackerAppUI(
             AddEditScreen(
                 viewModel = addEditViewModel,
                 transactionId = viewId,
+                activeBookId = activeBook?.id ?: 1,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -101,6 +111,8 @@ fun MoneyTrackerAppUI(
             val reportViewModel: ReportViewModel = viewModel(factory = ReportViewModelFactory(app.repository))
             ReportScreen(
                 viewModel = reportViewModel,
+                activeBookId = activeBook?.id ?: 1,
+                activeBookName = activeBook?.name ?: "Buku Utama",
                 onNavigateBack = { navController.popBackStack() }
             )
         }

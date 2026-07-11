@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,6 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -41,12 +45,18 @@ import java.util.*
 @Composable
 fun ReportScreen(
     viewModel: ReportViewModel,
+    activeBookId: Int = 1,
+    activeBookName: String = "Buku Utama",
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 }
     val isDark = MaterialTheme.colorScheme.background == DarkBackground
+
+    LaunchedEffect(activeBookId) {
+        viewModel.setBookId(activeBookId)
+    }
 
     Scaffold(
         topBar = {
@@ -58,13 +68,38 @@ fun ReportScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { ExportUtils.exportToXlsx(context, uiState.transactions) }) {
+                    IconButton(onClick = { 
+                        ExportUtils.exportToXlsx(
+                            context = context, 
+                            transactions = uiState.transactions, 
+                            bookName = activeBookName,
+                            reportMode = uiState.reportMode,
+                            year = uiState.currentYear,
+                            month = uiState.currentMonth
+                        ) 
+                    }) {
                         Icon(Icons.Default.GridOn, contentDescription = "Ekspor Excel (.xlsx)")
                     }
-                    IconButton(onClick = { ExportUtils.exportToCsv(context, uiState.transactions) }) {
+                    IconButton(onClick = { 
+                        ExportUtils.exportToCsv(
+                            context = context, 
+                            transactions = uiState.transactions, 
+                            bookName = activeBookName,
+                            reportMode = uiState.reportMode
+                        ) 
+                    }) {
                         Icon(Icons.Default.TableChart, contentDescription = "Ekspor CSV")
                     }
-                    IconButton(onClick = { ExportUtils.exportToPdf(context, uiState.transactions) }) {
+                    IconButton(onClick = {
+                        ExportUtils.exportToPdf(
+                            context = context,
+                            transactions = uiState.transactions,
+                            bookName = activeBookName,
+                            reportMode = uiState.reportMode,
+                            currentMonth = uiState.currentMonth,
+                            currentYear = uiState.currentYear
+                        )
+                    }) {
                         Icon(Icons.Default.PictureAsPdf, contentDescription = "Ekspor PDF")
                     }
                 },
@@ -72,11 +107,40 @@ fun ReportScreen(
             )
         }
     ) { paddingValues ->
+        val scrollState = rememberScrollState()
+        val coroutineScope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
+                .pointerInput(scrollState) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.type == PointerEventType.Scroll) {
+                                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                                if (delta != 0f) {
+                                    coroutineScope.launch {
+                                        scrollState.scrollBy(delta * 120f)
+                                    }
+                                }
+                            } else if (event.type == PointerEventType.Move) {
+                                val change = event.changes.firstOrNull()
+                                if (change != null && change.pressed) {
+                                    val currentY = change.position.y
+                                    val previousY = change.previousPosition.y
+                                    val deltaY = previousY - currentY
+                                    if (deltaY != 0f) {
+                                        coroutineScope.launch {
+                                            scrollState.scrollBy(deltaY)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
         ) {
             // Tabs / Selector for Mode (Bulanan vs Tahunan)
             Row(
@@ -219,12 +283,37 @@ fun ReportScreen(
                 if (uiState.totalIncome == 0.0 && uiState.totalExpense == 0.0) {
                     Text("Belum ada data", modifier = Modifier.align(Alignment.Center))
                 } else {
-                    SimpleBarChart(
-                        income = uiState.totalIncome,
-                        expense = uiState.totalExpense,
-                        isDark = isDark,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    if (uiState.reportMode == ReportMode.MONTHLY) {
+                        SimpleBarChart(
+                            income = uiState.totalIncome,
+                            expense = uiState.totalExpense,
+                            isDark = isDark,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        val monthlyTotals = remember(uiState.transactions) {
+                            val totals = Array(12) { Pair(0.0, 0.0) }
+                            val cal = Calendar.getInstance()
+                            uiState.transactions.forEach { t ->
+                                cal.timeInMillis = t.dateMillis
+                                val m = cal.get(Calendar.MONTH)
+                                if (m in 0..11) {
+                                    val cur = totals[m]
+                                    if (t.type == TransactionType.INCOME) {
+                                        totals[m] = Pair(cur.first + t.amount, cur.second)
+                                    } else {
+                                        totals[m] = Pair(cur.first, cur.second + t.amount)
+                                    }
+                                }
+                            }
+                            totals.toList()
+                        }
+                        YearlyBarChart(
+                            monthlyTotals = monthlyTotals,
+                            isDark = isDark,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
 
@@ -252,27 +341,6 @@ fun ReportScreen(
             ) {
                 val expenseSelected = categoryType == TransactionType.EXPENSE
                 
-                // Button Pengeluaran
-                FilledTonalButton(
-                    onClick = { categoryType = TransactionType.EXPENSE },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = if (expenseSelected) {
-                            if (isDark) ExpenseBgDark else ExpenseBgLight
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        },
-                        contentColor = if (expenseSelected) {
-                            if (isDark) ExpenseColorDark else ExpenseColorLight
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Pengeluaran", fontWeight = if (expenseSelected) FontWeight.Bold else FontWeight.Normal)
-                }
-
                 // Button Pemasukan
                 FilledTonalButton(
                     onClick = { categoryType = TransactionType.INCOME },
@@ -292,6 +360,27 @@ fun ReportScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text("Pemasukan", fontWeight = if (!expenseSelected) FontWeight.Bold else FontWeight.Normal)
+                }
+
+                // Button Pengeluaran
+                FilledTonalButton(
+                    onClick = { categoryType = TransactionType.EXPENSE },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = if (expenseSelected) {
+                            if (isDark) ExpenseBgDark else ExpenseBgLight
+                        } else {
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        },
+                        contentColor = if (expenseSelected) {
+                            if (isDark) ExpenseColorDark else ExpenseColorLight
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Pengeluaran", fontWeight = if (expenseSelected) FontWeight.Bold else FontWeight.Normal)
                 }
             }
 
@@ -475,5 +564,80 @@ fun SimpleBarChart(income: Double, expense: Double, isDark: Boolean, modifier: M
             end = Offset(size.width, size.height - 20f),
             strokeWidth = 2f
         )
+    }
+}
+
+@Composable
+fun YearlyBarChart(
+    monthlyTotals: List<Pair<Double, Double>>,
+    isDark: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val incomeColor = if (isDark) IncomeColorDark else IncomeColorLight
+    val expenseColor = if (isDark) ExpenseColorDark else ExpenseColorLight
+    val lineColor = if (isDark) DarkOutlineVariant else LightOutlineVariant
+
+    val maxVal = monthlyTotals.maxOf { maxOf(it.first, it.second) }.coerceAtLeast(1.0)
+
+    Column(modifier = modifier) {
+        Canvas(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            val segmentWidth = size.width / 12f
+            val maxBarHeight = size.height
+
+            monthlyTotals.forEachIndexed { index, (income, expense) ->
+                val startX = index * segmentWidth
+                val barWidth = (segmentWidth * 0.35f).coerceAtLeast(4f)
+                val gap = (segmentWidth - (barWidth * 2)) / 2f
+
+                val incomeHeight = (income / maxVal) * maxBarHeight
+                val expenseHeight = (expense / maxVal) * maxBarHeight
+
+                // Draw Income Bar (Left)
+                if (income > 0) {
+                    drawRoundRect(
+                        color = incomeColor,
+                        topLeft = Offset(startX + gap, (size.height - incomeHeight).toFloat()),
+                        size = Size(barWidth, incomeHeight.toFloat()),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f)
+                    )
+                }
+
+                // Draw Expense Bar (Right)
+                if (expense > 0) {
+                    drawRoundRect(
+                        color = expenseColor,
+                        topLeft = Offset(startX + gap + barWidth, (size.height - expenseHeight).toFloat()),
+                        size = Size(barWidth, expenseHeight.toFloat()),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f)
+                    )
+                }
+            }
+
+            // Base line
+            drawLine(
+                color = lineColor,
+                start = Offset(0f, size.height),
+                end = Offset(size.width, size.height),
+                strokeWidth = 2f
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val monthLabels = listOf("Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des")
+            monthLabels.forEach { label ->
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
+        }
     }
 }

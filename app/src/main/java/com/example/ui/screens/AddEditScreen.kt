@@ -1,11 +1,15 @@
 package com.example.ui.screens
 
+import kotlinx.coroutines.launch
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -30,14 +34,15 @@ import java.util.*
 fun AddEditScreen(
     viewModel: AddEditViewModel,
     transactionId: Int?,
+    activeBookId: Int = 1,
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
 
-    LaunchedEffect(transactionId) {
-        viewModel.loadTransaction(transactionId)
+    LaunchedEffect(transactionId, activeBookId) {
+        viewModel.loadTransaction(transactionId, activeBookId)
     }
 
     Scaffold(
@@ -53,12 +58,41 @@ fun AddEditScreen(
             )
         }
     ) { paddingValues ->
+        val scrollState = rememberScrollState()
+        val coroutineScope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState)
+                .pointerInput(scrollState) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.type == PointerEventType.Scroll) {
+                                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                                if (delta != 0f) {
+                                    coroutineScope.launch {
+                                        scrollState.scrollBy(delta * 120f)
+                                    }
+                                }
+                            } else if (event.type == PointerEventType.Move) {
+                                val change = event.changes.firstOrNull()
+                                if (change != null && change.pressed) {
+                                    val currentY = change.position.y
+                                    val previousY = change.previousPosition.y
+                                    val deltaY = previousY - currentY
+                                    if (deltaY != 0f) {
+                                        coroutineScope.launch {
+                                            scrollState.scrollBy(deltaY)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Type Selector (Income / Expense)

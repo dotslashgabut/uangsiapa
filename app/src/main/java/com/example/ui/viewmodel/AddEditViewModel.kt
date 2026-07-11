@@ -22,16 +22,17 @@ data class AddEditUiState(
     val category: String = "",
     val description: String = "",
     val dateMillis: Long = System.currentTimeMillis(),
-    val isAmountValid: Boolean = true
+    val isAmountValid: Boolean = true,
+    val bookId: Int = 1
 )
 
 class AddEditViewModel(private val repository: TransactionRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(AddEditUiState())
     val uiState: StateFlow<AddEditUiState> = _uiState.asStateFlow()
 
-    fun loadTransaction(id: Int?) {
+    fun loadTransaction(id: Int?, activeBookId: Int) {
         if (id == null || id == 0) {
-            _uiState.value = AddEditUiState()
+            _uiState.value = AddEditUiState(bookId = activeBookId)
             return
         }
         viewModelScope.launch {
@@ -50,7 +51,8 @@ class AddEditViewModel(private val repository: TransactionRepository) : ViewMode
                     amountStr = digitsOnly,
                     category = transaction.category,
                     description = transaction.description,
-                    dateMillis = transaction.dateMillis
+                    dateMillis = transaction.dateMillis,
+                    bookId = transaction.bookId
                 )
             }
         }
@@ -94,14 +96,14 @@ class AddEditViewModel(private val repository: TransactionRepository) : ViewMode
         
         // Auto-fill category if blank
         val resolvedCategory = if (currentState.category.isBlank()) {
-            if (currentState.type == TransactionType.INCOME) "Uang Masuk" else "Uang Keluar"
+            if (currentState.type == TransactionType.INCOME) "Pemasukan" else "Pengeluaran"
         } else {
             currentState.category
         }
 
         // Auto-fill description if blank
         val resolvedDescription = if (currentState.description.isBlank()) {
-            if (currentState.type == TransactionType.INCOME) "Uang masuk" else "Uang keluar"
+            if (currentState.type == TransactionType.INCOME) "Pemasukan" else "Pengeluaran"
         } else {
             currentState.description
         }
@@ -112,7 +114,8 @@ class AddEditViewModel(private val repository: TransactionRepository) : ViewMode
             amount = amount,
             category = resolvedCategory,
             description = resolvedDescription,
-            dateMillis = currentState.dateMillis
+            dateMillis = currentState.dateMillis,
+            bookId = currentState.bookId
         )
 
         viewModelScope.launch {

@@ -2,5 +2,7 @@
   "name": "Uang Siapa?",
   "description": "Simple income and expense tracker with monthly reports and data export.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
