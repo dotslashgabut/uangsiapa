@@ -40,9 +40,10 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Nominal Realistis Sesuai UMP:** Transaksi gaji pada Sample Buku disesuaikan secara realistis sebesar Rp3.000.000,- per bulan mengikuti rata-rata Upah Minimum Provinsi (UMP).
 - **Ajakan Interaktif:** Jika belum ada transaksi sama sekali, layar utama menampilkan ajakan yang interaktif beserta tombol pintas untuk langsung membuat Sample Buku agar pengguna bisa langsung mengeksplorasi visualisasi laporan dan analisis diagram secara instan.
 
-### 6. **Backup & Restore Data Pintar (Multi-Buku)**
+### 6. **Backup & Restore Data Pintar (Multi-Buku - Terbaru)**
 - **Ekspor JSON Multi-Buku:** Amankan data keuangan Anda secara lokal dengan mengekspor seluruh transaksi lengkap dengan informasi nama buku asal masing-masing transaksi ke dalam satu file cadangan berformat JSON.
 - **Impor Cerdas Tanpa Konflik:** Ketika memulihkan cadangan, sistem secara otomatis melacak dan mengelompokkan transaksi ke buku yang sesuai berdasarkan namanya. Jika buku asal transaksi tersebut tidak ditemukan (misalnya telah dihapus), sistem akan otomatis membuat kembali buku tersebut secara dinamis tanpa merusak data atau menimpa transaksi pada buku lain yang aktif. Hal ini menjamin integritas pembukuan terpisah Anda tetap terjaga dengan sempurna.
+- **Pencegahan Nama Buku Duplikat (Case-Insensitive):** Guna menghindari konflik data saat pembuatan buku, penamaan sample buku, pengeditan/rename nama buku, maupun saat proses impor JSON, sistem akan mendeteksi nama buku yang sama secara case-insensitive. Jika ditemukan konflik nama, sistem otomatis menambahkan sufiks angka seperti ` (1)`, ` (2)`, dan seterusnya secara cerdas, menjaga data antar buku keuangan tetap terisolasi dengan rapi.
 
 ### 7. **Tema Gelap & Terang Dinamis**
 - Antarmuka modern Material Design 3 yang ramah mata dengan dukungan Dark Mode dan Light Mode yang dapat diganti secara instan di layar utama.

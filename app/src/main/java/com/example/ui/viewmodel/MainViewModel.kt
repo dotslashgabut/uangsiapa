@@ -49,13 +49,29 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
         }
     }
 
+    private suspend fun getUniqueBookName(baseName: String, excludeId: Int? = null): String {
+        val trimmed = baseName.trim()
+        val nameToUse = if (trimmed.isEmpty()) "Buku Baru" else trimmed
+        var currentCandidate = nameToUse
+        var counter = 1
+        while (true) {
+            val existing = repository.getBookByName(currentCandidate)
+            if (existing == null || (excludeId != null && existing.id == excludeId)) {
+                return currentCandidate
+            }
+            currentCandidate = "$nameToUse ($counter)"
+            counter++
+        }
+    }
+
     fun selectBook(book: Book) {
         _activeBook.value = book
     }
 
     fun insertBook(name: String, isDefault: Boolean = false) {
         viewModelScope.launch {
-            val newId = repository.insertBook(Book(name = name, isDefault = isDefault))
+            val uniqueName = getUniqueBookName(name)
+            val newId = repository.insertBook(Book(name = uniqueName, isDefault = isDefault))
             val newBook = repository.getBookById(newId)
             if (newBook != null) {
                 if (isDefault) {
@@ -69,9 +85,11 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
 
     fun updateBook(book: Book) {
         viewModelScope.launch {
-            repository.updateBook(book)
+            val uniqueName = getUniqueBookName(book.name, excludeId = book.id)
+            val updatedBook = book.copy(name = uniqueName)
+            repository.updateBook(updatedBook)
             if (_activeBook.value?.id == book.id) {
-                _activeBook.value = book
+                _activeBook.value = updatedBook
             }
         }
     }
@@ -125,12 +143,8 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
                 val targetBookName = if (bName.isEmpty()) defaultBookName else bName
 
                 val bookId = bookCache.getOrPut(targetBookName) {
-                    val existingBook = repository.getBookByName(targetBookName)
-                    if (existingBook != null) {
-                        existingBook.id
-                    } else {
-                        repository.insertBook(Book(name = targetBookName, isDefault = false))
-                    }
+                    val uniqueName = getUniqueBookName(targetBookName)
+                    repository.insertBook(Book(name = uniqueName, isDefault = false))
                 }
                 repository.insert(item.transaction.copy(id = 0, bookId = bookId))
             }
@@ -139,8 +153,9 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
 
     fun insertSampleBook() {
         viewModelScope.launch {
-            // 1. Create the Book named "Sample Buku"
-            val newId = repository.insertBook(Book(name = "Sample Buku", isDefault = false))
+            val uniqueName = getUniqueBookName("Sample Buku")
+            // 1. Create the Book named uniqueName
+            val newId = repository.insertBook(Book(name = uniqueName, isDefault = false))
             val newBook = repository.getBookById(newId)
             
             if (newBook != null) {
