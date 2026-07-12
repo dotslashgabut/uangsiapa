@@ -12,9 +12,12 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - Swipe to gesture (Geser ke Kiri untuk Hapus, Geser ke Kanan untuk Edit).
 - Tampilan riwayat transaksi yang rapi di mana tanggal diformat detail hingga jam-menit (`dd MMM yyyy, HH:mm`) dan keterangan diposisikan tepat di bawah tanggal untuk readability optimal.
 
-### 2. **Filter & Pencarian Pintar**
+### 2. **Filter & Pencarian Pintar (Terbaru)**
 - **Filter Tipe Transaksi:** Saring transaksi langsung di layar utama berdasarkan "Semua", "Uang Masuk", atau "Uang Keluar".
 - **Filter Kategori Dinamis:** Saring transaksi berdasarkan kategori yang pernah dibuat secara otomatis tanpa konfigurasi manual.
+- **Tata Letak Konsisten & Responsif:** Dropdown tanggal, filter tipe, dan filter kategori kini disusun secara rapi mengisi seluruh lebar layar dengan proporsi grid yang seimbang dan fungsional.
+- **Tombol Reset Tanggal Cepat:** Dilengkapi tombol pintas "Reset" tanggal yang dinamis dan tetap terlihat guna memudahkan pengguna kembali ke tampilan semua data.
+- **Ringkasan Filter Aktif Presisi:** Menampilkan rekapitulasi data terfilter ("Masuk", "Keluar", dan "Selisih" di baris baru yang rapi) secara instan ketika filter aktif digunakan.
 
 ### 3. **Laporan Bulanan & Tahunan Interaktif**
 - **Ringkasan Visual Bulanan:** Grafik batang minimalis yang membandingkan total pemasukan dan pengeluaran bulan berjalan.
@@ -34,8 +37,9 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Nominal Realistis Sesuai UMP:** Transaksi gaji pada Sample Buku disesuaikan secara realistis sebesar Rp3.000.000,- per bulan mengikuti rata-rata Upah Minimum Provinsi (UMP).
 - **Ajakan Interaktif:** Jika belum ada transaksi sama sekali, layar utama menampilkan ajakan yang interaktif beserta tombol pintas untuk langsung membuat Sample Buku agar pengguna bisa langsung mengeksplorasi visualisasi laporan dan analisis diagram secara instan.
 
-### 6. **Backup & Restore Data**
-- Amankan data Anda secara lokal dengan fitur ekspor data cadangan berformat JSON, dan impor kembali kapan saja di perangkat lain.
+### 6. **Backup & Restore Data Pintar (Multi-Buku)**
+- **Ekspor JSON Multi-Buku:** Amankan data keuangan Anda secara lokal dengan mengekspor seluruh transaksi lengkap dengan informasi nama buku asal masing-masing transaksi ke dalam satu file cadangan berformat JSON.
+- **Impor Cerdas Tanpa Konflik:** Ketika memulihkan cadangan, sistem secara otomatis melacak dan mengelompokkan transaksi ke buku yang sesuai berdasarkan namanya. Jika buku asal transaksi tersebut tidak ditemukan (misalnya telah dihapus), sistem akan otomatis membuat kembali buku tersebut secara dinamis tanpa merusak data atau menimpa transaksi pada buku lain yang aktif. Hal ini menjamin integritas pembukuan terpisah Anda tetap terjaga dengan sempurna.
 
 ### 7. **Tema Gelap & Terang Dinamis**
 - Antarmuka modern Material Design 3 yang ramah mata dengan dukungan Dark Mode dan Light Mode yang dapat diganti secara instan di layar utama.

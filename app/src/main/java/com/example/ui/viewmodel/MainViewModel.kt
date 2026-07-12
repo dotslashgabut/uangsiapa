@@ -113,13 +113,26 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
         }
     }
 
-    fun importBackup(transactions: List<Transaction>) {
-        val activeId = _activeBook.value?.id ?: 1
+    fun importBackup(importedList: List<com.example.utils.ImportedTransaction>) {
         viewModelScope.launch {
-            for (t in transactions) {
-                // Ensure imported transactions are bound to the active book
-                // Set id to 0 so they are inserted as brand new records instead of overwriting existing ones
-                repository.insert(t.copy(id = 0, bookId = activeId))
+            val bookCache = mutableMapOf<String, Int>()
+            val activeBook = _activeBook.value
+            val defaultBookId = activeBook?.id ?: 1
+            val defaultBookName = activeBook?.name ?: "Buku Utama"
+
+            for (item in importedList) {
+                val bName = item.bookName.trim()
+                val targetBookName = if (bName.isEmpty()) defaultBookName else bName
+
+                val bookId = bookCache.getOrPut(targetBookName) {
+                    val existingBook = repository.getBookByName(targetBookName)
+                    if (existingBook != null) {
+                        existingBook.id
+                    } else {
+                        repository.insertBook(Book(name = targetBookName, isDefault = false))
+                    }
+                }
+                repository.insert(item.transaction.copy(id = 0, bookId = bookId))
             }
         }
     }

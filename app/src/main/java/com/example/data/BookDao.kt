@@ -16,6 +16,9 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE id = :id")
     suspend fun getBookById(id: Int): Book?
 
+    @Query("SELECT * FROM books WHERE name = :name LIMIT 1")
+    suspend fun getBookByName(name: String): Book?
+
     @Query("SELECT * FROM books WHERE isDefault = 1 LIMIT 1")
     suspend fun getDefaultBook(): Book?
 

@@ -62,8 +62,13 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.scrollBy
@@ -101,9 +106,17 @@ fun HomeScreen(
 
     var selectedTypeFilter by remember { mutableStateOf<TransactionType?>(null) }
     var selectedCategoryFilter by remember { mutableStateOf<String>("Semua") }
+    var selectedDateFilterType by remember { mutableStateOf<DateFilterType>(DateFilterType.ALL) }
+    var customStartDate by remember { mutableStateOf<Long?>(null) }
+    var customEndDate by remember { mutableStateOf<Long?>(null) }
     
     var showTypeMenu by remember { mutableStateOf(false) }
     var showCategoryMenu by remember { mutableStateOf(false) }
+    var showDateMenu by remember { mutableStateOf(false) }
+
+    var showCustomDateDialog by remember { mutableStateOf(false) }
+    var tempStartDate by remember { mutableStateOf<Long?>(null) }
+    var tempEndDate by remember { mutableStateOf<Long?>(null) }
 
     val availableCategories = remember(transactions) {
         transactions.map { it.category.trim() }.filter { it.isNotEmpty() }.distinct().sorted()
@@ -115,13 +128,36 @@ fun HomeScreen(
         }
     }
 
-    val filteredTransactions = remember(transactions, selectedTypeFilter, selectedCategoryFilter) {
+    val filteredTransactions = remember(transactions, selectedTypeFilter, selectedCategoryFilter, selectedDateFilterType, customStartDate, customEndDate) {
         transactions.filter { t ->
             val matchesType = selectedTypeFilter == null || t.type == selectedTypeFilter
             val matchesCategory = selectedCategoryFilter == "Semua" || t.category.trim().equals(selectedCategoryFilter.trim(), ignoreCase = true)
-            matchesType && matchesCategory
+            
+            val matchesDate = when (selectedDateFilterType) {
+                DateFilterType.ALL -> true
+                DateFilterType.TODAY -> {
+                    isSameDay(t.dateMillis, System.currentTimeMillis())
+                }
+                DateFilterType.LAST_7_DAYS -> {
+                    val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+                    t.dateMillis >= startOfDay(sevenDaysAgo)
+                }
+                DateFilterType.THIS_MONTH -> {
+                    isSameMonthAndYear(t.dateMillis, System.currentTimeMillis())
+                }
+                DateFilterType.CUSTOM -> {
+                    val start = customStartDate?.let { startOfDay(it) } ?: Long.MIN_VALUE
+                    val end = customEndDate?.let { endOfDay(it) } ?: Long.MAX_VALUE
+                    t.dateMillis in start..end
+                }
+            }
+            matchesType && matchesCategory && matchesDate
         }
     }
+
+    val filteredIncome = filteredTransactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
+    val filteredExpense = filteredTransactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
+    val filteredBalance = filteredIncome - filteredExpense
 
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -238,7 +274,7 @@ fun HomeScreen(
                                 leadingIcon = { Icon(Icons.Default.Backup, contentDescription = null) },
                                 onClick = {
                                     showMenu = false
-                                    com.example.utils.BackupUtils.exportBackup(context, transactions)
+                                    com.example.utils.BackupUtils.exportBackup(context, transactions, activeBook?.name ?: "Buku Utama")
                                 }
                             )
                             DropdownMenuItem(
@@ -326,7 +362,7 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp)
+                        .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 2.dp)
                         .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(24.dp)),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -439,99 +475,382 @@ fun HomeScreen(
                 }
             }
 
-            // Filters Row Item
+            // Row Filter Gabungan
             item {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(top = 8.dp, bottom = 1.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    // Tipe Filter Chip
-                    Box(modifier = Modifier.weight(1f)) {
-                        FilterChip(
-                            selected = selectedTypeFilter != null,
-                            onClick = { showTypeMenu = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = {
-                                Text(
-                                    text = when (selectedTypeFilter) {
-                                        TransactionType.INCOME -> "Masuk"
-                                        TransactionType.EXPENSE -> "Keluar"
-                                        else -> "Tipe: Semua"
+                    // Tanggal Filter Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Tanggal Filter Chip
+                        Box(modifier = Modifier.weight(1.3f)) {
+                            FilterChip(
+                                selected = selectedDateFilterType != DateFilterType.ALL,
+                                onClick = { showDateMenu = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = {
+                                    Text(
+                                        text = when (selectedDateFilterType) {
+                                            DateFilterType.ALL -> "Tanggal: Semua"
+                                            DateFilterType.TODAY -> "Hari Ini"
+                                            DateFilterType.LAST_7_DAYS -> "7 Hari"
+                                            DateFilterType.THIS_MONTH -> "Bulan Ini"
+                                            DateFilterType.CUSTOM -> {
+                                                if (customStartDate != null && customEndDate != null) {
+                                                    val df = SimpleDateFormat("dd/MM", Locale("id", "ID"))
+                                                    "${df.format(Date(customStartDate!!))}-${df.format(Date(customEndDate!!))}"
+                                                } else {
+                                                    "Kustom"
+                                                }
+                                            }
+                                        },
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            )
+                            DropdownMenu(
+                                expanded = showDateMenu,
+                                onDismissRequest = { showDateMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Semua Tanggal") },
+                                    onClick = {
+                                        selectedDateFilterType = DateFilterType.ALL
+                                        showDateMenu = false
                                     }
                                 )
-                            },
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
+                                DropdownMenuItem(
+                                    text = { Text("Hari Ini") },
+                                    onClick = {
+                                        selectedDateFilterType = DateFilterType.TODAY
+                                        showDateMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("7 Hari Terakhir") },
+                                    onClick = {
+                                        selectedDateFilterType = DateFilterType.LAST_7_DAYS
+                                        showDateMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Bulan Ini") },
+                                    onClick = {
+                                        selectedDateFilterType = DateFilterType.THIS_MONTH
+                                        showDateMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Kustom (Pilih Rentang)...") },
+                                    onClick = {
+                                        showDateMenu = false
+                                        tempStartDate = customStartDate ?: System.currentTimeMillis()
+                                        tempEndDate = customEndDate ?: System.currentTimeMillis()
+                                        showCustomDateDialog = true
+                                    }
                                 )
                             }
-                        )
-                        DropdownMenu(
-                            expanded = showTypeMenu,
-                            onDismissRequest = { showTypeMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Semua Tipe") },
+                        }
+
+                        // Button Sekali Klik "Hari Ini"
+                        val isTodaySelected = selectedDateFilterType == DateFilterType.TODAY
+                        Box(modifier = Modifier.weight(1f)) {
+                            FilterChip(
+                                selected = isTodaySelected,
                                 onClick = {
-                                    selectedTypeFilter = null
-                                    showTypeMenu = false
+                                    selectedDateFilterType = if (isTodaySelected) DateFilterType.ALL else DateFilterType.TODAY
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = {
+                                    Text(
+                                        "Hari Ini",
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Today,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Uang Masuk (Income)") },
+                        }
+
+                        // Tombol Reset Tanggal
+                        Box(modifier = Modifier.weight(0.9f)) {
+                            AssistChip(
                                 onClick = {
-                                    selectedTypeFilter = TransactionType.INCOME
-                                    showTypeMenu = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Uang Keluar (Expense)") },
-                                onClick = {
-                                    selectedTypeFilter = TransactionType.EXPENSE
-                                    showTypeMenu = false
-                                }
+                                    selectedDateFilterType = DateFilterType.ALL
+                                    customStartDate = null
+                                    customEndDate = null
+                                },
+                                enabled = selectedDateFilterType != DateFilterType.ALL,
+                                modifier = Modifier.fillMaxWidth(),
+                                label = {
+                                    Text(
+                                        "Reset",
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = "Reset",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                },
+                                border = androidx.compose.foundation.BorderStroke(
+                                    1.dp,
+                                    if (selectedDateFilterType != DateFilterType.ALL) MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                )
                             )
                         }
                     }
 
-                    // Kategori Filter Chip
-                    Box(modifier = Modifier.weight(1f)) {
-                        FilterChip(
-                            selected = selectedCategoryFilter != "Semua",
-                            onClick = { showCategoryMenu = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text(if (selectedCategoryFilter == "Semua") "Kategori: Semua" else selectedCategoryFilter) },
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        )
-                        DropdownMenu(
-                            expanded = showCategoryMenu,
-                            onDismissRequest = { showCategoryMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Semua Kategori") },
-                                onClick = {
-                                    selectedCategoryFilter = "Semua"
-                                    showCategoryMenu = false
+                    // Tipe & Kategori Filter Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Tipe Filter Chip
+                        Box(modifier = Modifier.weight(1f)) {
+                            FilterChip(
+                                selected = selectedTypeFilter != null,
+                                onClick = { showTypeMenu = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = {
+                                    Text(
+                                        text = when (selectedTypeFilter) {
+                                            TransactionType.INCOME -> "Masuk"
+                                            TransactionType.EXPENSE -> "Keluar"
+                                            else -> "Tipe: Semua"
+                                        },
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
                                 }
                             )
-                            availableCategories.forEach { category ->
+                            DropdownMenu(
+                                expanded = showTypeMenu,
+                                onDismissRequest = { showTypeMenu = false }
+                            ) {
                                 DropdownMenuItem(
-                                    text = { Text(category) },
+                                    text = { Text("Semua Tipe") },
                                     onClick = {
-                                        selectedCategoryFilter = category
+                                        selectedTypeFilter = null
+                                        showTypeMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Masuk (Income)") },
+                                    onClick = {
+                                        selectedTypeFilter = TransactionType.INCOME
+                                        showTypeMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Keluar (Expense)") },
+                                    onClick = {
+                                        selectedTypeFilter = TransactionType.EXPENSE
+                                        showTypeMenu = false
+                                    }
+                                )
+                            }
+                        }
+
+                        // Kategori Filter Chip
+                        Box(modifier = Modifier.weight(1f)) {
+                            FilterChip(
+                                selected = selectedCategoryFilter != "Semua",
+                                onClick = { showCategoryMenu = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = {
+                                    Text(
+                                        text = if (selectedCategoryFilter == "Semua") "Kategori: Semua" else selectedCategoryFilter,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                },
+                                trailingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            )
+                            DropdownMenu(
+                                expanded = showCategoryMenu,
+                                onDismissRequest = { showCategoryMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Semua Kategori") },
+                                    onClick = {
+                                        selectedCategoryFilter = "Semua"
                                         showCategoryMenu = false
                                     }
+                                )
+                                availableCategories.forEach { category ->
+                                    DropdownMenuItem(
+                                        text = { Text(category) },
+                                        onClick = {
+                                            selectedCategoryFilter = category
+                                            showCategoryMenu = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Ringkasan Filter Aktif (Kotak Baru / Sementara)
+            if (selectedTypeFilter != null || selectedCategoryFilter != "Semua" || selectedDateFilterType != DateFilterType.ALL) {
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 2.dp)
+                            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.FilterAlt,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        "RINGKASAN FILTER AKTIF",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
+                                
+                                Text(
+                                    "Hapus Filter",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .clickable {
+                                            selectedTypeFilter = null
+                                            selectedCategoryFilter = "Semua"
+                                            selectedDateFilterType = DateFilterType.ALL
+                                            customStartDate = null
+                                            customEndDate = null
+                                        }
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(6.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                // Filtered Income
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Masuk",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                    )
+                                    Text(
+                                        text = currencyFormat.format(filteredIncome),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        color = if (isDark) IncomeColorDark else IncomeColorLight
+                                    )
+                                }
+                                
+                                // Filtered Expense
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Keluar",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                    )
+                                    Text(
+                                        text = currencyFormat.format(filteredExpense),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        color = if (isDark) ExpenseColorDark else ExpenseColorLight
+                                    )
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(6.dp))
+                            androidx.compose.material3.HorizontalDivider(
+                                modifier = Modifier.fillMaxWidth(),
+                                thickness = 1.dp,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f)
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "Selisih",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    text = currencyFormat.format(filteredBalance),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                             }
                         }
@@ -544,7 +863,7 @@ fun HomeScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 4.dp),
+                        .padding(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -563,6 +882,9 @@ fun HomeScreen(
                             .clickable {
                                 selectedTypeFilter = null
                                 selectedCategoryFilter = "Semua"
+                                selectedDateFilterType = DateFilterType.ALL
+                                customStartDate = null
+                                customEndDate = null
                             }
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -586,7 +908,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Mulai catat keuangan Anda dengan tombol + di bawah, atau coba buat Sample Buku dengan data simulasi 20 transaksi untuk langsung melihat visualisasi laporan!",
+                            text = "Mulai catat keuangan Anda dengan tombol + atau buat data simulasi untuk melihat visualisasi laporan!",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
@@ -961,6 +1283,150 @@ fun HomeScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteBookConfirm = null }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+
+    // Native DatePickerDialog for custom start date
+    val startCalendar = Calendar.getInstance().apply { 
+        timeInMillis = tempStartDate ?: System.currentTimeMillis() 
+    }
+    val startDatePickerDialog = remember(tempStartDate) {
+        android.app.DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val cal = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth, 0, 0, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                tempStartDate = cal.timeInMillis
+            },
+            startCalendar.get(Calendar.YEAR),
+            startCalendar.get(Calendar.MONTH),
+            startCalendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    // Native DatePickerDialog for custom end date
+    val endCalendar = Calendar.getInstance().apply { 
+        timeInMillis = tempEndDate ?: System.currentTimeMillis() 
+    }
+    val endDatePickerDialog = remember(tempEndDate) {
+        android.app.DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val cal = Calendar.getInstance().apply {
+                    set(year, month, dayOfMonth, 23, 59, 59)
+                    set(Calendar.MILLISECOND, 999)
+                }
+                tempEndDate = cal.timeInMillis
+            },
+            endCalendar.get(Calendar.YEAR),
+            endCalendar.get(Calendar.MONTH),
+            endCalendar.get(Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    if (showCustomDateDialog) {
+        val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale("id", "ID")) }
+        AlertDialog(
+            onDismissRequest = { showCustomDateDialog = false },
+            title = { Text("Pilih Rentang Tanggal", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Start Date picker field
+                    Column {
+                        Text(
+                            "Tanggal Mulai",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedCard(
+                            onClick = { startDatePickerDialog.show() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = tempStartDate?.let { dateFormat.format(Date(it)) } ?: "Pilih tanggal...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (tempStartDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+
+                    // End Date picker field
+                    Column {
+                        Text(
+                            "Tanggal Selesai",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedCard(
+                            onClick = { endDatePickerDialog.show() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = tempEndDate?.let { dateFormat.format(Date(it)) } ?: "Pilih tanggal...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (tempEndDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (tempStartDate != null && tempEndDate != null) {
+                            customStartDate = tempStartDate
+                            customEndDate = tempEndDate
+                            selectedDateFilterType = DateFilterType.CUSTOM
+                            showCustomDateDialog = false
+                        }
+                    },
+                    enabled = tempStartDate != null && tempEndDate != null
+                ) {
+                    Text("Terapkan")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCustomDateDialog = false }) {
                     Text("Batal")
                 }
             }
@@ -1380,5 +1846,45 @@ fun CompactHeader(
             )
         }
     }
+}
+
+enum class DateFilterType {
+    ALL, TODAY, LAST_7_DAYS, THIS_MONTH, CUSTOM
+}
+
+private fun startOfDay(millis: Long): Long {
+    val cal = Calendar.getInstance().apply {
+        timeInMillis = millis
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+    return cal.timeInMillis
+}
+
+private fun endOfDay(millis: Long): Long {
+    val cal = Calendar.getInstance().apply {
+        timeInMillis = millis
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE, 59)
+        set(Calendar.SECOND, 59)
+        set(Calendar.MILLISECOND, 999)
+    }
+    return cal.timeInMillis
+}
+
+private fun isSameDay(m1: Long, m2: Long): Boolean {
+    val cal1 = Calendar.getInstance().apply { timeInMillis = m1 }
+    val cal2 = Calendar.getInstance().apply { timeInMillis = m2 }
+    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+           cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+}
+
+private fun isSameMonthAndYear(m1: Long, m2: Long): Boolean {
+    val cal1 = Calendar.getInstance().apply { timeInMillis = m1 }
+    val cal2 = Calendar.getInstance().apply { timeInMillis = m2 }
+    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+           cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
 }
 

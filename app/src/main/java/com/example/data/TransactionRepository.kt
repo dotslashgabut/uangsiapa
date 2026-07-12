@@ -11,6 +11,8 @@ class TransactionRepository(
 
     suspend fun getBookById(id: Int): Book? = bookDao.getBookById(id)
 
+    suspend fun getBookByName(name: String): Book? = bookDao.getBookByName(name)
+
     suspend fun getDefaultBook(): Book {
         val defaultBook = bookDao.getDefaultBook()
         if (defaultBook != null) return defaultBook

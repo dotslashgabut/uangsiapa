@@ -15,9 +15,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+data class ImportedTransaction(
+    val transaction: Transaction,
+    val bookName: String
+)
+
 object BackupUtils {
 
-    fun exportBackup(context: Context, transactions: List<Transaction>) {
+    fun exportBackup(context: Context, transactions: List<Transaction>, bookName: String) {
         try {
             val jsonArray = JSONArray()
             for (t in transactions) {
@@ -28,6 +33,7 @@ object BackupUtils {
                     put("category", t.category)
                     put("description", t.description)
                     put("dateMillis", t.dateMillis)
+                    put("bookName", bookName)
                 }
                 jsonArray.put(obj)
             }
@@ -45,14 +51,14 @@ object BackupUtils {
         }
     }
 
-    fun importBackup(context: Context, uri: Uri): List<Transaction>? {
+    fun importBackup(context: Context, uri: Uri): List<ImportedTransaction>? {
         return try {
             val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
             val jsonString = inputStream?.bufferedReader()?.use { it.readText() }
             if (jsonString.isNullOrBlank()) return null
             
             val jsonArray = JSONArray(jsonString)
-            val list = mutableListOf<Transaction>()
+            val list = mutableListOf<ImportedTransaction>()
             for (i in 0 until jsonArray.length()) {
                 val obj = jsonArray.getJSONObject(i)
                 val typeStr = obj.getString("type")
@@ -66,7 +72,8 @@ object BackupUtils {
                     description = obj.optString("description", ""),
                     dateMillis = obj.getLong("dateMillis")
                 )
-                list.add(transaction)
+                val bookName = obj.optString("bookName", "")
+                list.add(ImportedTransaction(transaction, bookName))
             }
             list
         } catch (e: Exception) {
