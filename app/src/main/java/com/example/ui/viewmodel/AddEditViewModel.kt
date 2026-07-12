@@ -59,7 +59,13 @@ class AddEditViewModel(private val repository: TransactionRepository) : ViewMode
     }
 
     fun updateType(type: TransactionType) {
-        _uiState.update { it.copy(type = type) }
+        _uiState.update { 
+            if (it.type != type) {
+                it.copy(type = type, category = "")
+            } else {
+                it
+            }
+        }
     }
 
     fun updateAmount(amount: String) {
@@ -103,7 +109,7 @@ class AddEditViewModel(private val repository: TransactionRepository) : ViewMode
 
         // Auto-fill description if blank
         val resolvedDescription = if (currentState.description.isBlank()) {
-            if (currentState.type == TransactionType.INCOME) "Pemasukan" else "Pengeluaran"
+            "-"
         } else {
             currentState.description
         }

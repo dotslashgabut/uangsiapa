@@ -6,9 +6,12 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 
 ## 🌟 Fitur Utama
 
-### 1. **Pencatatan Keuangan Presisi**
+### 1. **Pencatatan Keuangan Presisi (Terbaru)**
 - Tambah, ubah, dan hapus transaksi dengan nominal, kategori, keterangan, dan tanggal yang fleksibel.
 - Dukungan format mata uang Rupiah (Rp) yang diformat secara otomatis selama pengetikan.
+- **Saran Kategori Cerdas (Dropdown):** Kolom kategori kini dilengkapi dengan tombol dropdown yang menyajikan daftar saran kategori siap pakai secara dinamis (berbeda untuk "Uang Masuk" dan "Uang Keluar") guna mempercepat input data tanpa mengetik ulang.
+- **Pembersihan Kategori Otomatis:** Saat beralih tab antara "Uang Masuk" dan "Uang Keluar", kolom input kategori akan otomatis dibersihkan untuk mencegah salah pilih kategori lintas tipe transaksi.
+- **Keterangan Default Minimalis:** Pengisian transaksi yang tidak menyertakan keterangan kini akan otomatis diatur ke nilai default `-` (strip) untuk menjaga kerapian visual di layar riwayat transaksi.
 - Swipe to gesture (Geser ke Kiri untuk Hapus, Geser ke Kanan untuk Edit).
 - Tampilan riwayat transaksi yang rapi di mana tanggal diformat detail hingga jam-menit (`dd MMM yyyy, HH:mm`) dan keterangan diposisikan tepat di bawah tanggal untuk readability optimal.
 

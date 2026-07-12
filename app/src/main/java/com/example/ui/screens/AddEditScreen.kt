@@ -12,6 +12,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -124,13 +126,45 @@ fun AddEditScreen(
                 visualTransformation = RupiahVisualTransformation()
             )
 
-            OutlinedTextField(
-                value = uiState.category,
-                onValueChange = { viewModel.updateCategory(it) },
-                label = { Text("Kategori") },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Misal: Makanan, Gaji, dll.") }
-            )
+            var showCategoryDropdown by remember { mutableStateOf(false) }
+            val predefinedCategories = if (uiState.type == TransactionType.INCOME) {
+                listOf("Gaji", "Bonus", "Investasi", "Penjualan", "Hadiah", "Sampingan", "Pemasukan Lain")
+            } else {
+                listOf("Makanan & Minuman", "Belanja", "Transportasi", "Tagihan & Utilitas", "Hiburan", "Kesehatan", "Pendidikan", "Sedekah", "Pengeluaran Lain")
+            }
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = uiState.category,
+                    onValueChange = { viewModel.updateCategory(it) },
+                    label = { Text("Kategori") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Misal: Makanan, Gaji, dll.") },
+                    trailingIcon = {
+                        IconButton(onClick = { showCategoryDropdown = !showCategoryDropdown }) {
+                            Icon(
+                                imageVector = if (showCategoryDropdown) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                contentDescription = "Pilih Kategori"
+                            )
+                        }
+                    }
+                )
+                DropdownMenu(
+                    expanded = showCategoryDropdown,
+                    onDismissRequest = { showCategoryDropdown = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    predefinedCategories.forEach { categoryName ->
+                        DropdownMenuItem(
+                            text = { Text(categoryName) },
+                            onClick = {
+                                viewModel.updateCategory(categoryName)
+                                showCategoryDropdown = false
+                            }
+                        )
+                    }
+                }
+            }
 
             OutlinedTextField(
                 value = uiState.description,
