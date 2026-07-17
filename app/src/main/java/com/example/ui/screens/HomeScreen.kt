@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -188,6 +189,7 @@ fun HomeScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(
                 title = {
@@ -303,6 +305,9 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onNavigateToAddEdit(null) },
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .displayCutoutPadding(),
                 shape = RoundedCornerShape(16.dp),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -363,9 +368,35 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 2.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(24.dp)),
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = if (isDark) {
+                                    listOf(
+                                        Color(0xFF3B1B7D), // Glowing premium violet
+                                        Color(0xFF1E1B4B), // Deep midnight indigo
+                                        Color(0xFF13111C)  // Midnight slate
+                                    )
+                                } else {
+                                    listOf(
+                                        Color(0xFFE0E7FF), // Chic Indigo-Blue
+                                        Color(0xFFF1E1FF), // Soft lavender glow
+                                        Color(0xFFFFE3EC)  // Warm rose-pink highlight
+                                    )
+                                }
+                            ),
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (isDark) {
+                                Color(0xFF4F378B).copy(alpha = 0.4f)
+                            } else {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            },
+                            shape = RoundedCornerShape(24.dp)
+                        ),
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(
@@ -1453,6 +1484,7 @@ fun HomeScreen(
             },
             text = {
                 Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(

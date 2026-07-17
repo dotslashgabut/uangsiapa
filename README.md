@@ -45,7 +45,13 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Impor Cerdas Tanpa Konflik:** Ketika memulihkan cadangan, sistem secara otomatis melacak dan mengelompokkan transaksi ke buku yang sesuai berdasarkan namanya. Jika buku asal transaksi tersebut tidak ditemukan (misalnya telah dihapus), sistem akan otomatis membuat kembali buku tersebut secara dinamis tanpa merusak data atau menimpa transaksi pada buku lain yang aktif. Hal ini menjamin integritas pembukuan terpisah Anda tetap terjaga dengan sempurna.
 - **Pencegahan Nama Buku Duplikat (Case-Insensitive):** Guna menghindari konflik data saat pembuatan buku, penamaan sample buku, pengeditan/rename nama buku, maupun saat proses impor JSON, sistem akan mendeteksi nama buku yang sama secara case-insensitive. Jika ditemukan konflik nama, sistem otomatis menambahkan sufiks angka seperti ` (1)`, ` (2)`, dan seterusnya secara cerdas, menjaga data antar buku keuangan tetap terisolasi dengan rapi.
 
-### 7. **Tema Gelap & Terang Dinamis**
+### 7. **Tema Gelap & Terang Dinamis & Optimasi Lanskap (Terbaru)**
+- **Gradient Total Saldo Premium:** Kotak ringkasan total saldo utama kini dibalut dengan gradasi warna linear (gradient) 3-stop yang modern, sangat estetik, dan nyaman di mata:
+  - **Light Mode:** Gradasi pastel premium sejuk yang mengalir lembut dari warna biru-indigo chic, lavender lembut, hingga sentuhan rose-pink hangat.
+  - **Dark Mode:** Gradasi kosmik nebula mewah yang memadukan warna violet berpendar, indigo pekat, hingga transisi abu-abu gelap metalik yang menyatu dengan latar belakang gelap.
+- **Optimasi Lanskap & Rotasi Layar:** 
+  - Penambahan `safeDrawing` insets pada seluruh layar (`Scaffold`) dan `displayCutoutPadding` pada Floating Action Button (FAB) untuk mencegah pemotongan tombol/konten saat layar dirotasi ke mode landscape pada perangkat yang memiliki takik (notch), cutout, atau black bar/sisi navigasi sistem Android model lama.
+  - Peningkatan pada dialog popup **"Tentang Aplikasi"** yang kini mendukung fitur scroll penuh (`verticalScroll`) sehingga seluruh informasi, tautan GitHub, dan donasi Saweria tetap dapat dibaca secara utuh di mode lanskap tanpa terpotong.
 - Antarmuka modern Material Design 3 yang ramah mata dengan dukungan Dark Mode dan Light Mode yang dapat diganti secara instan di layar utama.
 
 ---

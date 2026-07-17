@@ -59,6 +59,7 @@ fun ReportScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(
                 title = { Text(if (uiState.reportMode == ReportMode.MONTHLY) "Laporan Bulanan" else "Laporan Tahunan", fontWeight = FontWeight.SemiBold) },

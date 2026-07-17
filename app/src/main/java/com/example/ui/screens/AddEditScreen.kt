@@ -48,6 +48,7 @@ fun AddEditScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(
                 title = { Text(if (transactionId == null) "Tambah Transaksi" else "Edit Transaksi", fontWeight = FontWeight.SemiBold) },
