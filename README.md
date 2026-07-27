@@ -1,5 +1,7 @@
 # Uang Siapa? 💸
 
+<img src="./icon.svg" width="128" height="128" />
+
 Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untuk membantu pengguna melacak pendapatan (uang masuk) dan pengeluaran (uang keluar) dengan mudah, aman, dan sepenuhnya offline. Aplikasi ini mendukung visualisasi data, analisis kategori, serta ekspor laporan ke berbagai format populer (PDF, Excel, CSV).
 
 ---
