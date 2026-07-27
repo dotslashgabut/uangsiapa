@@ -286,9 +286,9 @@ fun AddEditScreen(
 
             // Category Picker & Chips
             val predefinedCategories = if (uiState.type == TransactionType.INCOME) {
-                listOf("Gaji", "Bonus", "Investasi", "Penjualan", "Hadiah", "Sampingan", "Pemasukan Lain")
+                listOf("Gaji", "Bonus", "Investasi", "Penjualan", "Hadiah", "Sampingan", "Utang", "Pemasukan Lain")
             } else {
-                listOf("Makanan & Minuman", "Belanja", "Transportasi", "Tagihan & Utilitas", "Hiburan", "Kesehatan", "Pendidikan", "Sedekah", "Pengeluaran Lain")
+                listOf("Makanan & Minuman", "Belanja", "Transportasi", "Tagihan & Utilitas", "Hiburan", "Kesehatan", "Pendidikan", "Bayar Utang", "Sedekah", "Pengeluaran Lain")
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

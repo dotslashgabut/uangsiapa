@@ -93,9 +93,9 @@ fun HomeScreen(
     var showEditBookDialog by remember { mutableStateOf<Book?>(null) }
     var showDeleteBookConfirm by remember { mutableStateOf<Book?>(null) }
 
-    val totalIncome = transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
-    val totalExpense = transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
-    val balance = totalIncome - totalExpense
+    val totalIncome = remember(transactions) { transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount } }
+    val totalExpense = remember(transactions) { transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount } }
+    val balance = remember(totalIncome, totalExpense) { totalIncome - totalExpense }
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -156,9 +156,9 @@ fun HomeScreen(
         }
     }
 
-    val filteredIncome = filteredTransactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
-    val filteredExpense = filteredTransactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
-    val filteredBalance = filteredIncome - filteredExpense
+    val filteredIncome = remember(filteredTransactions) { filteredTransactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount } }
+    val filteredExpense = remember(filteredTransactions) { filteredTransactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount } }
+    val filteredBalance = remember(filteredIncome, filteredExpense) { filteredIncome - filteredExpense }
 
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -184,7 +184,7 @@ fun HomeScreen(
         }
     }
 
-    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
     val currentMonthYear = remember { SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(Date()) }
 
     Scaffold(
@@ -331,35 +331,7 @@ fun HomeScreen(
         ) {
             LazyColumn(
                 state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(listState) {
-                        awaitPointerEventScope {
-                            while (true) {
-                                val event = awaitPointerEvent()
-                                if (event.type == PointerEventType.Scroll) {
-                                    val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                                    if (delta != 0f) {
-                                        coroutineScope.launch {
-                                            listState.scrollBy(delta * 120f)
-                                        }
-                                    }
-                                } else if (event.type == PointerEventType.Move) {
-                                    val change = event.changes.firstOrNull()
-                                    if (change != null && change.pressed) {
-                                        val currentY = change.position.y
-                                        val previousY = change.previousPosition.y
-                                        val deltaY = previousY - currentY
-                                        if (deltaY != 0f) {
-                                            coroutineScope.launch {
-                                                listState.scrollBy(deltaY)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 100.dp)
             ) {
             // Balance Card Item
@@ -1673,7 +1645,7 @@ fun TransactionCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID")) }
     val isIncome = transaction.type == TransactionType.INCOME
     val amountColor = if (isIncome) {
         if (isDark) IncomeColorDark else IncomeColorLight
@@ -1858,7 +1830,7 @@ fun CompactHeader(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp),
+            .height(60.dp),
         color = MaterialTheme.colorScheme.background,
         shadowElevation = 4.dp
     ) {
@@ -1867,7 +1839,7 @@ fun CompactHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -1875,14 +1847,14 @@ fun CompactHeader(
                 Column(horizontalAlignment = Alignment.Start) {
                     Text(
                         text = "TOTAL SALDO",
-                        fontSize = 8.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
                     )
                     Text(
                         text = currencyFormat.format(balance),
-                        fontSize = 13.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -1893,7 +1865,7 @@ fun CompactHeader(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(16.dp)
                                 .clip(CircleShape)
                                 .background(if (isDark) IncomeBgDark else IncomeBgLight),
                             contentAlignment = Alignment.Center
@@ -1902,22 +1874,22 @@ fun CompactHeader(
                                 imageVector = Icons.Default.ArrowDownward,
                                 contentDescription = null,
                                 tint = if (isDark) IncomeColorDark else IncomeColorLight,
-                                modifier = Modifier.size(8.dp)
+                                modifier = Modifier.size(10.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Uang Masuk",
-                            fontSize = 8.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.Medium
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
                     Text(
                         text = currencyFormat.format(totalIncome),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         color = if (isDark) IncomeColorDark else IncomeColorLight
                     )
                 }
@@ -1927,7 +1899,7 @@ fun CompactHeader(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(14.dp)
+                                .size(16.dp)
                                 .clip(CircleShape)
                                 .background(if (isDark) ExpenseBgDark else ExpenseBgLight),
                             contentAlignment = Alignment.Center
@@ -1936,22 +1908,22 @@ fun CompactHeader(
                                 imageVector = Icons.Default.ArrowUpward,
                                 contentDescription = null,
                                 tint = if (isDark) ExpenseColorDark else ExpenseColorLight,
-                                modifier = Modifier.size(8.dp)
+                                modifier = Modifier.size(10.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Uang Keluar",
-                            fontSize = 8.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.Medium
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
                     Text(
                         text = currencyFormat.format(totalExpense),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         color = if (isDark) ExpenseColorDark else ExpenseColorLight
                     )
                 }

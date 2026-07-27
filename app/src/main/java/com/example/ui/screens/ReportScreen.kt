@@ -57,7 +57,7 @@ fun ReportScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
     val isDark = MaterialTheme.colorScheme.background == DarkBackground
 
     LaunchedEffect(activeBookId) {
@@ -120,16 +120,18 @@ fun ReportScreen(
             derivedStateOf { scrollState.value > 120 }
         }
 
-        val stickyDisplayText = if (uiState.reportMode == ReportMode.MONTHLY) {
-            val monthName = SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(
-                Calendar.getInstance().apply {
-                    set(Calendar.MONTH, uiState.currentMonth)
-                    set(Calendar.YEAR, uiState.currentYear)
-                }.time
-            )
-            monthName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-        } else {
-            "Tahun ${uiState.currentYear}"
+        val stickyDisplayText = remember(uiState.reportMode, uiState.currentMonth, uiState.currentYear) {
+            if (uiState.reportMode == ReportMode.MONTHLY) {
+                val monthName = SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(
+                    Calendar.getInstance().apply {
+                        set(Calendar.MONTH, uiState.currentMonth)
+                        set(Calendar.YEAR, uiState.currentYear)
+                    }.time
+                )
+                monthName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+            } else {
+                "Tahun ${uiState.currentYear}"
+            }
         }
 
         Box(
@@ -141,34 +143,7 @@ fun ReportScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .pointerInput(scrollState) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            if (event.type == PointerEventType.Scroll) {
-                                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                                if (delta != 0f) {
-                                    coroutineScope.launch {
-                                        scrollState.scrollBy(delta * 120f)
-                                    }
-                                }
-                            } else if (event.type == PointerEventType.Move) {
-                                val change = event.changes.firstOrNull()
-                                if (change != null && change.pressed) {
-                                    val currentY = change.position.y
-                                    val previousY = change.previousPosition.y
-                                    val deltaY = previousY - currentY
-                                    if (deltaY != 0f) {
-                                        coroutineScope.launch {
-                                            scrollState.scrollBy(deltaY)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-        ) {
+            ) {
             // Tabs / Selector for Mode (Bulanan vs Tahunan)
             Row(
                 modifier = Modifier
@@ -243,16 +218,18 @@ fun ReportScreen(
                     )
                 }
                 
-                val displayText = if (uiState.reportMode == ReportMode.MONTHLY) {
-                    val monthName = SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(
-                        Calendar.getInstance().apply {
-                            set(Calendar.MONTH, uiState.currentMonth)
-                            set(Calendar.YEAR, uiState.currentYear)
-                        }.time
-                    )
-                    monthName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                } else {
-                    "Tahun ${uiState.currentYear}"
+                val displayText = remember(uiState.reportMode, uiState.currentMonth, uiState.currentYear) {
+                    if (uiState.reportMode == ReportMode.MONTHLY) {
+                        val monthName = SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(
+                            Calendar.getInstance().apply {
+                                set(Calendar.MONTH, uiState.currentMonth)
+                                set(Calendar.YEAR, uiState.currentYear)
+                            }.time
+                        )
+                        monthName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                    } else {
+                        "Tahun ${uiState.currentYear}"
+                    }
                 }
                 
                 Text(
@@ -490,8 +467,12 @@ fun ReportScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Filter transactions by selected type and group them
-            val selectedTransactions = uiState.transactions.filter { it.type == categoryType }
-            val totalForType = selectedTransactions.sumOf { it.amount }
+            val selectedTransactions = remember(uiState.transactions, categoryType) {
+                uiState.transactions.filter { it.type == categoryType }
+            }
+            val totalForType = remember(selectedTransactions) {
+                selectedTransactions.sumOf { it.amount }
+            }
 
             Card(
                 modifier = Modifier
@@ -517,10 +498,12 @@ fun ReportScreen(
                         )
                     }
                 } else {
-                    val categoryGroups = selectedTransactions.groupBy { it.category }
-                        .mapValues { entry -> entry.value.sumOf { it.amount } }
-                        .toList()
-                        .sortedByDescending { it.second }
+                    val categoryGroups = remember(selectedTransactions) {
+                        selectedTransactions.groupBy { it.category }
+                            .mapValues { entry -> entry.value.sumOf { it.amount } }
+                            .toList()
+                            .sortedByDescending { it.second }
+                    }
 
                     val categoryColors = listOf(
                         Color(0xFF6366F1), // Indigo

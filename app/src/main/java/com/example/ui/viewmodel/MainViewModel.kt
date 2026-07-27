@@ -161,42 +161,55 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
             if (newBook != null) {
                 _activeBook.value = newBook
                 
-                // 2. Prepare 21 dummy transactions spanning from Jan to Jul 2026
+                // 2. Prepare dummy transactions spanning from Jan to Jul 2026 including Utang and Bayar Utang
                 val dummyTransactions = listOf(
                     // January 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.JANUARY, 5, newId),
                     createDummyTx(TransactionType.EXPENSE, 150000.0, "Belanja", "Belanja Mingguan Supermarket", 2026, java.util.Calendar.JANUARY, 8, newId),
-                    createDummyTx(TransactionType.EXPENSE, 85000.0, "Makanan", "Makan Malam Bersama Keluarga", 2026, java.util.Calendar.JANUARY, 15, newId),
+                    createDummyTx(TransactionType.EXPENSE, 85000.0, "Makanan & Minuman", "Makan Malam Bersama Keluarga", 2026, java.util.Calendar.JANUARY, 15, newId),
+                    createDummyTx(TransactionType.EXPENSE, 50000.0, "Transportasi", "Bensin Motor Bulanan", 2026, java.util.Calendar.JANUARY, 20, newId),
                     
                     // February 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.FEBRUARY, 5, newId),
+                    createDummyTx(TransactionType.INCOME, 250000.0, "Sampingan", "Penjualan Barang Bekas Online", 2026, java.util.Calendar.FEBRUARY, 6, newId),
                     createDummyTx(TransactionType.EXPENSE, 120000.0, "Transportasi", "Bensin dan Tol", 2026, java.util.Calendar.FEBRUARY, 7, newId),
-                    createDummyTx(TransactionType.EXPENSE, 450000.0, "Tagihan", "Bayar Listrik dan Air", 2026, java.util.Calendar.FEBRUARY, 10, newId),
+                    createDummyTx(TransactionType.EXPENSE, 450000.0, "Tagihan & Utilitas", "Bayar Listrik dan Air", 2026, java.util.Calendar.FEBRUARY, 10, newId),
                     createDummyTx(TransactionType.EXPENSE, 200000.0, "Kesehatan", "Beli Vitamin & Obat", 2026, java.util.Calendar.FEBRUARY, 18, newId),
                     
                     // March 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.MARCH, 5, newId),
                     createDummyTx(TransactionType.INCOME, 1200000.0, "Bonus", "Bonus Proyek Sampingan", 2026, java.util.Calendar.MARCH, 15, newId),
                     createDummyTx(TransactionType.EXPENSE, 350000.0, "Hiburan", "Nonton Film & Rekreasi", 2026, java.util.Calendar.MARCH, 20, newId),
-                    createDummyTx(TransactionType.EXPENSE, 180000.0, "Makanan", "Beli Kopi & Camilan Kantor", 2026, java.util.Calendar.MARCH, 25, newId),
+                    createDummyTx(TransactionType.EXPENSE, 180000.0, "Makanan & Minuman", "Beli Kopi & Camilan Kantor", 2026, java.util.Calendar.MARCH, 25, newId),
+                    createDummyTx(TransactionType.EXPENSE, 300000.0, "Pendidikan", "Beli Buku & E-Course", 2026, java.util.Calendar.MARCH, 28, newId),
                     
                     // April 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.APRIL, 5, newId),
+                    createDummyTx(TransactionType.INCOME, 1000000.0, "Utang", "Pinjam Uang ke Budi (Modal Usaha)", 2026, java.util.Calendar.APRIL, 10, newId),
                     createDummyTx(TransactionType.EXPENSE, 250000.0, "Belanja", "Beli Sepatu Baru", 2026, java.util.Calendar.APRIL, 12, newId),
                     createDummyTx(TransactionType.EXPENSE, 110000.0, "Transportasi", "Service Motor", 2026, java.util.Calendar.APRIL, 19, newId),
+                    createDummyTx(TransactionType.EXPENSE, 150000.0, "Sedekah", "Infaq & Donasi Jumat", 2026, java.util.Calendar.APRIL, 24, newId),
                     
                     // May 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.MAY, 5, newId),
-                    createDummyTx(TransactionType.EXPENSE, 500000.0, "Tagihan", "Paket Internet & TV Kabel", 2026, java.util.Calendar.MAY, 10, newId),
-                    createDummyTx(TransactionType.EXPENSE, 140000.0, "Makanan", "Makan Siang Steak", 2026, java.util.Calendar.MAY, 22, newId),
+                    createDummyTx(TransactionType.INCOME, 500000.0, "Utang", "Pinjaman Singkat Teman (Ahmad)", 2026, java.util.Calendar.MAY, 8, newId),
+                    createDummyTx(TransactionType.EXPENSE, 500000.0, "Tagihan & Utilitas", "Paket Internet & TV Kabel", 2026, java.util.Calendar.MAY, 10, newId),
+                    createDummyTx(TransactionType.EXPENSE, 350000.0, "Bayar Utang", "Cicilan Utang Ke Budi (1/2)", 2026, java.util.Calendar.MAY, 15, newId),
+                    createDummyTx(TransactionType.EXPENSE, 140000.0, "Makanan & Minuman", "Makan Siang Steak", 2026, java.util.Calendar.MAY, 22, newId),
                     
                     // June 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.JUNE, 5, newId),
+                    createDummyTx(TransactionType.INCOME, 750000.0, "Penjualan", "Penjualan Kerajinan Tangan", 2026, java.util.Calendar.JUNE, 10, newId),
+                    createDummyTx(TransactionType.EXPENSE, 500000.0, "Bayar Utang", "Pelunasan Utang Ke Ahmad", 2026, java.util.Calendar.JUNE, 12, newId),
                     createDummyTx(TransactionType.EXPENSE, 300000.0, "Belanja", "Hadiah Ulang Tahun Teman", 2026, java.util.Calendar.JUNE, 14, newId),
+                    createDummyTx(TransactionType.EXPENSE, 350000.0, "Bayar Utang", "Cicilan Utang Ke Budi (2/2)", 2026, java.util.Calendar.JUNE, 20, newId),
                     
                     // July 2026
                     createDummyTx(TransactionType.INCOME, 3000000.0, "Gaji", "Gaji Bulanan Utama", 2026, java.util.Calendar.JULY, 5, newId),
-                    createDummyTx(TransactionType.EXPENSE, 95000.0, "Makanan", "Makan Bakso & Es Teh", 2026, java.util.Calendar.JULY, 10, newId)
+                    createDummyTx(TransactionType.INCOME, 350000.0, "Hadiah", "Kado Hadiah dari Kakak", 2026, java.util.Calendar.JULY, 8, newId),
+                    createDummyTx(TransactionType.EXPENSE, 300000.0, "Bayar Utang", "Pelunasan Sisa Utang Budi", 2026, java.util.Calendar.JULY, 12, newId),
+                    createDummyTx(TransactionType.EXPENSE, 95000.0, "Makanan & Minuman", "Makan Bakso & Es Teh", 2026, java.util.Calendar.JULY, 15, newId),
+                    createDummyTx(TransactionType.EXPENSE, 220000.0, "Belanja", "Belanja Sembako Bulanan", 2026, java.util.Calendar.JULY, 20, newId)
                 )
                 
                 for (t in dummyTransactions) {
