@@ -37,6 +37,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val sharedPreferences = getSharedPreferences("theme_prefs", android.content.Context.MODE_PRIVATE)
         enableEdgeToEdge()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            window.attributes.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            window.attributes.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
         setContent {
             val systemDark = isSystemInDarkTheme()
             var isDarkTheme by remember { 
@@ -59,6 +64,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        window.decorView.requestApplyInsets()
     }
 }
 
