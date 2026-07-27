@@ -1,5 +1,10 @@
 package com.example.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -31,6 +36,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.TransactionType
 import com.example.ui.theme.*
@@ -110,12 +116,32 @@ fun ReportScreen(
     ) { paddingValues ->
         val scrollState = rememberScrollState()
         val coroutineScope = rememberCoroutineScope()
-        Column(
+        val showStickyHeader by remember {
+            derivedStateOf { scrollState.value > 120 }
+        }
+
+        val stickyDisplayText = if (uiState.reportMode == ReportMode.MONTHLY) {
+            val monthName = SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(
+                Calendar.getInstance().apply {
+                    set(Calendar.MONTH, uiState.currentMonth)
+                    set(Calendar.YEAR, uiState.currentYear)
+                }.time
+            )
+            monthName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        } else {
+            "Tahun ${uiState.currentYear}"
+        }
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(scrollState)
-                .pointerInput(scrollState) {
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .pointerInput(scrollState) {
                     awaitPointerEventScope {
                         while (true) {
                             val event = awaitPointerEvent()
@@ -245,27 +271,103 @@ fun ReportScreen(
                 }
             }
 
-            // Summary
+            // Summary Cards Row
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(24.dp)),
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(24.dp)
+                    ),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ),
                 elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Pemasukan", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(currencyFormat.format(uiState.totalIncome), color = if (isDark) IncomeColorDark else IncomeColorLight, fontWeight = FontWeight.Bold)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Net Balance
+                        val netBalance = uiState.totalIncome - uiState.totalExpense
+                        Column {
+                            Text(
+                                "TOTAL NETTO", 
+                                style = MaterialTheme.typography.labelSmall, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                currencyFormat.format(netBalance),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = if (netBalance >= 0) {
+                                    if (isDark) IncomeColorDark else IncomeColorLight
+                                } else {
+                                    if (isDark) ExpenseColorDark else ExpenseColorLight
+                                }
+                            )
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = if (netBalance >= 0) "+ Surplus" else "- Defisit",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                            )
+                        }
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Pengeluaran", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(currencyFormat.format(uiState.totalExpense), color = if (isDark) ExpenseColorDark else ExpenseColorLight, fontWeight = FontWeight.Bold)
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        // Income Summary Column
+                        Column(horizontalAlignment = Alignment.Start, modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Pemasukan", 
+                                style = MaterialTheme.typography.labelMedium, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                currencyFormat.format(uiState.totalIncome), 
+                                color = if (isDark) IncomeColorDark else IncomeColorLight, 
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        // Expense Summary Column
+                        Column(horizontalAlignment = Alignment.Start, modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Pengeluaran", 
+                                style = MaterialTheme.typography.labelMedium, 
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                currencyFormat.format(uiState.totalExpense), 
+                                color = if (isDark) ExpenseColorDark else ExpenseColorLight, 
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
                 }
             }
@@ -461,6 +563,64 @@ fun ReportScreen(
                                 percentage = percentage,
                                 color = color,
                                 currencyFormat = currencyFormat
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Close main Column
+            }
+
+            AnimatedVisibility(
+                visible = showStickyHeader,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { -it }),
+                modifier = Modifier.align(Alignment.TopCenter)
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f),
+                    shadowElevation = 6.dp,
+                    tonalElevation = 4.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { 
+                                if (uiState.reportMode == ReportMode.MONTHLY) viewModel.prevMonth() else viewModel.prevYear() 
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.ChevronLeft, 
+                                contentDescription = if (uiState.reportMode == ReportMode.MONTHLY) "Bulan Sebelumnya" else "Tahun Sebelumnya",
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        
+                        Text(
+                            text = stickyDisplayText, 
+                            style = MaterialTheme.typography.titleMedium, 
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        
+                        IconButton(
+                            onClick = { 
+                                if (uiState.reportMode == ReportMode.MONTHLY) viewModel.nextMonth() else viewModel.nextYear() 
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.ChevronRight, 
+                                contentDescription = if (uiState.reportMode == ReportMode.MONTHLY) "Bulan Berikutnya" else "Tahun Berikutnya",
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }

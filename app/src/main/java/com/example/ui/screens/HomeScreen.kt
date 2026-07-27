@@ -233,7 +233,7 @@ fun HomeScreen(
                             imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
                             contentDescription = "Ganti Tema",
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -248,7 +248,7 @@ fun HomeScreen(
                             imageVector = Icons.Default.Assessment,
                             contentDescription = "Laporan",
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -264,7 +264,7 @@ fun HomeScreen(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "Menu Lainnya",
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                         DropdownMenu(
@@ -1485,10 +1485,10 @@ fun HomeScreen(
             text = {
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untuk membantu Anda melacak pendapatan dan pengeluaran secara mudah, aman, dan sepenuhnya offline.",
+                        text = "Aplikasi pencatatan keuangan pribadi yang simpel, aman, dan 100% offline.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1496,86 +1496,73 @@ fun HomeScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     
                     // GitHub Link Section
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MenuBook,
-                                contentDescription = "GitHub",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Default.MenuBook,
+                            contentDescription = "GitHub",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Column {
                             Text(
-                                text = "Kode Sumber / GitHub Repository:",
+                                text = "Kode Sumber (GitHub)",
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                        }
-                        Text(
-                            text = "https://github.com/dotslashgabut/uangsiapa",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                textDecoration = TextDecoration.Underline,
-                                color = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = Modifier
-                                .clickable {
+                            Text(
+                                text = "github.com/dotslashgabut/uangsiapa",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    textDecoration = TextDecoration.Underline,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                modifier = Modifier.clickable {
                                     try {
                                         uriHandler.openUri("https://github.com/dotslashgabut/uangsiapa")
                                     } catch (e: Exception) {
                                         // gracefully handled
                                     }
                                 }
-                                .padding(vertical = 2.dp)
-                        )
+                            )
+                        }
                     }
                     
                     // Saweria Support Section
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LocalCafe,
-                                contentDescription = "Saweria",
-                                tint = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.size(18.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Default.LocalCafe,
+                            contentDescription = "Saweria",
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Column {
                             Text(
-                                text = "Dukungan & Donasi via Saweria:",
+                                text = "Dukungan Saweria",
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                        }
-                        Text(
-                            text = "https://saweria.co/dotslashgabut",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                textDecoration = TextDecoration.Underline,
-                                color = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = Modifier
-                                .clickable {
+                            Text(
+                                text = "saweria.co/dotslashgabut",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    textDecoration = TextDecoration.Underline,
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                modifier = Modifier.clickable {
                                     try {
                                         uriHandler.openUri("https://saweria.co/dotslashgabut")
                                     } catch (e: Exception) {
                                         // gracefully handled
                                     }
                                 }
-                                .padding(vertical = 2.dp)
-                        )
-                        Text(
-                            text = "Traktir kopi untuk mendukung pengembangan & pemeliharaan aplikasi ini agar tetap gratis dan tanpa iklan.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                            )
+                        }
                     }
                 }
             },
@@ -1665,7 +1652,13 @@ fun TransactionItemWithSwipe(
                 Box(
                     modifier = Modifier.offset { IntOffset(counterOffset.roundToInt(), 0) }
                 ) {
-                    TransactionCard(transaction, currencyFormat, isDark)
+                    TransactionCard(
+                        transaction = transaction, 
+                        currencyFormat = currencyFormat, 
+                        isDark = isDark,
+                        onEdit = onEdit,
+                        onDelete = onDelete
+                    )
                 }
             }
         )
@@ -1673,7 +1666,13 @@ fun TransactionItemWithSwipe(
 }
 
 @Composable
-fun TransactionCard(transaction: Transaction, currencyFormat: NumberFormat, isDark: Boolean) {
+fun TransactionCard(
+    transaction: Transaction, 
+    currencyFormat: NumberFormat, 
+    isDark: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
     val isIncome = transaction.type == TransactionType.INCOME
     val amountColor = if (isIncome) {
@@ -1685,81 +1684,167 @@ fun TransactionCard(transaction: Transaction, currencyFormat: NumberFormat, isDa
     val containerColor = if (isDark) {
         MaterialTheme.colorScheme.surface
     } else {
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+        MaterialTheme.colorScheme.surface
     }
     
     val borderColor = if (isDark) {
-        MaterialTheme.colorScheme.outlineVariant
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
     } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
     }
     
-    val iconBgColor = if (isIncome) {
-        if (isDark) IncomeBgDark else IncomeBgLight
-    } else {
-        if (isDark) ExpenseBgDark else ExpenseBgLight
-    }
+    val (categoryIcon, iconBgColor) = getCategoryIconAndColor(transaction.category, isIncome, isDark)
     
     val iconTint = if (isIncome) {
         if (isDark) IncomeColorDark else IncomeColorLight
     } else {
         if (isDark) ExpenseColorDark else ExpenseColorLight
     }
+
+    var showItemMenu by remember { mutableStateOf(false) }
     
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp)
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp)),
+            .padding(vertical = 3.dp)
+            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
+            .clickable { onEdit() },
         colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
                     .background(iconBgColor),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isIncome) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+                    imageVector = categoryIcon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier
-                        .size(18.dp)
-                        .rotate(45f)
+                    modifier = Modifier.size(20.dp)
                 )
             }
             
             Column(modifier = Modifier.weight(1f)) {
-                Text(transaction.category, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Text(
-                    dateFormat.format(Date(transaction.dateMillis)), 
-                    fontSize = 11.sp, 
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    text = transaction.category, 
+                    fontWeight = FontWeight.Bold, 
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = if (transaction.description.isNotBlank()) transaction.description else (if (isIncome) "Pendapatan" else "Pengeluaran"), 
+                    fontSize = 12.sp, 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
                 Text(
-                    if (transaction.description.isNotBlank()) transaction.description else if (isIncome) "Pendapatan" else "Pengeluaran", 
-                    fontSize = 12.sp, 
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = dateFormat.format(Date(transaction.dateMillis)), 
+                    fontSize = 10.sp, 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
             
-            Text(
-                text = "${if(isIncome) "+" else "-"}${currencyFormat.format(transaction.amount)}",
-                color = amountColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
+            Surface(
+                color = iconBgColor.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(
+                    text = "${if (isIncome) "+" else "-"}${currencyFormat.format(transaction.amount)}",
+                    color = amountColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            Box {
+                IconButton(
+                    onClick = { showItemMenu = true },
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Opsi Transaksi",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                DropdownMenu(
+                    expanded = showItemMenu,
+                    onDismissRequest = { showItemMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Edit Transaksi", fontSize = 13.sp) },
+                        leadingIcon = { 
+                            Icon(
+                                Icons.Default.Edit, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            ) 
+                        },
+                        onClick = {
+                            showItemMenu = false
+                            onEdit()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Hapus Transaksi", fontSize = 13.sp, color = MaterialTheme.colorScheme.error) },
+                        leadingIcon = { 
+                            Icon(
+                                Icons.Default.Delete, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(18.dp)
+                            ) 
+                        },
+                        onClick = {
+                            showItemMenu = false
+                            onDelete()
+                        }
+                    )
+                }
+            }
         }
     }
+}
+
+@Composable
+fun getCategoryIconAndColor(category: String, isIncome: Boolean, isDark: Boolean): Pair<androidx.compose.ui.graphics.vector.ImageVector, Color> {
+    val cat = category.trim().lowercase(Locale.ROOT)
+    val icon = when {
+        cat.contains("makanan") || cat.contains("minuman") || cat.contains("makan") || cat.contains("kopi") || cat.contains("kuliner") -> Icons.Default.LocalCafe
+        cat.contains("belanja") || cat.contains("mall") || cat.contains("pasar") || cat.contains("toko") -> Icons.Default.Receipt
+        cat.contains("transport") || cat.contains("bensin") || cat.contains("ojek") || cat.contains("parkir") -> Icons.Default.Star
+        cat.contains("gaji") || cat.contains("payday") || cat.contains("salary") -> Icons.Default.Paid
+        cat.contains("tagihan") || cat.contains("listrik") || cat.contains("air") || cat.contains("wifi") || cat.contains("pulsa") -> Icons.Default.Receipt
+        cat.contains("investasi") || cat.contains("saham") || cat.contains("reksa") || cat.contains("crypto") -> Icons.Default.Assessment
+        cat.contains("kesehatan") || cat.contains("obat") || cat.contains("dokter") || cat.contains("rumah sakit") -> Icons.Default.Info
+        cat.contains("hiburan") || cat.contains("game") || cat.contains("nonton") || cat.contains("film") -> Icons.Default.Paid
+        cat.contains("pendidikan") || cat.contains("kursus") || cat.contains("buku") || cat.contains("sekolah") -> Icons.Default.MenuBook
+        cat.contains("hadiah") || cat.contains("kado") -> Icons.Default.Star
+        cat.contains("sedekah") || cat.contains("donasi") || cat.contains("zakat") -> Icons.Default.Star
+        isIncome -> Icons.Default.ArrowDownward
+        else -> Icons.Default.ArrowUpward
+    }
+    val bgColor = if (isIncome) {
+        if (isDark) IncomeBgDark else IncomeBgLight
+    } else {
+        if (isDark) ExpenseBgDark else ExpenseBgLight
+    }
+    return Pair(icon, bgColor)
 }
 
 @Composable
