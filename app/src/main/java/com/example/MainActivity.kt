@@ -36,18 +36,53 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val sharedPreferences = getSharedPreferences("theme_prefs", android.content.Context.MODE_PRIVATE)
-        enableEdgeToEdge()
+        
+        val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val systemDark = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val initialDarkTheme = sharedPreferences.getBoolean("is_dark_theme", systemDark)
+        
+        // Immediately set window background to match user preference before view rendering to prevent blank screen flash
+        val initialBgColor = if (initialDarkTheme) android.graphics.Color.parseColor("#090D16") else android.graphics.Color.parseColor("#F8FAFC")
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(initialBgColor))
+
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.auto(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT
+            ) { initialDarkTheme },
+            navigationBarStyle = androidx.activity.SystemBarStyle.auto(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT
+            ) { initialDarkTheme }
+        )
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             window.attributes.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
             window.attributes.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
+
         setContent {
-            val systemDark = isSystemInDarkTheme()
             var isDarkTheme by remember { 
                 mutableStateOf(sharedPreferences.getBoolean("is_dark_theme", systemDark)) 
             }
             
+            androidx.compose.runtime.DisposableEffect(isDarkTheme) {
+                val windowBgColor = if (isDarkTheme) android.graphics.Color.parseColor("#090D16") else android.graphics.Color.parseColor("#F8FAFC")
+                window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(windowBgColor))
+                enableEdgeToEdge(
+                    statusBarStyle = androidx.activity.SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT
+                    ) { isDarkTheme },
+                    navigationBarStyle = androidx.activity.SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT
+                    ) { isDarkTheme }
+                )
+                onDispose {}
+            }
+
             MyApplicationTheme(darkTheme = isDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

@@ -13,6 +13,9 @@ interface BookDao {
     @Query("SELECT * FROM books ORDER BY id ASC")
     fun getAllBooks(): Flow<List<Book>>
 
+    @Query("SELECT * FROM books ORDER BY id ASC")
+    suspend fun getAllBooksSync(): List<Book>
+
     @Query("SELECT * FROM books WHERE id = :id")
     suspend fun getBookById(id: Int): Book?
 

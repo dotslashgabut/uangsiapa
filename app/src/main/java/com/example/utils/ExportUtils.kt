@@ -23,6 +23,28 @@ import com.example.ui.viewmodel.ReportMode
 
 object ExportUtils {
     
+    private val monthNamesIndo = listOf(
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    )
+
+    private fun getExportFileName(
+        bookName: String,
+        reportMode: ReportMode,
+        year: Int,
+        month: Int,
+        extension: String
+    ): String {
+        val sanitizedBook = bookName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
+        val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+        return if (reportMode == ReportMode.MONTHLY) {
+            val monthName = monthNamesIndo.getOrElse(month.coerceIn(0, 11)) { "Bulan" }
+            "laporan_bulanan_${monthName}_${year}_${sanitizedBook}_${timestamp}.${extension}"
+        } else {
+            "laporan_tahunan_${year}_${sanitizedBook}_${timestamp}.${extension}"
+        }
+    }
+    
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val dateTimeFormat = SimpleDateFormat("dd/MM/yyyy HH.mm", Locale.getDefault())
 
@@ -44,10 +66,7 @@ object ExportUtils {
         month: Int = Calendar.getInstance().get(Calendar.MONTH)
     ) {
         try {
-            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            val sanitizedBook = bookName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
-            val modeSuffix = if (reportMode == ReportMode.MONTHLY) "_bulanan" else "_tahunan"
-            val fileName = "laporan_${sanitizedBook}${modeSuffix}_$timestamp.xlsx"
+            val fileName = getExportFileName(bookName, reportMode, year, month, "xlsx")
             val file = File(context.cacheDir, fileName)
             FileOutputStream(file).use { fos ->
                 val workbook = Workbook(fos, "UangSiapa", "1.0")
@@ -617,13 +636,12 @@ object ExportUtils {
         context: Context, 
         transactions: List<Transaction>, 
         bookName: String,
-        reportMode: ReportMode = ReportMode.MONTHLY
+        reportMode: ReportMode = ReportMode.MONTHLY,
+        year: Int = Calendar.getInstance().get(Calendar.YEAR),
+        month: Int = Calendar.getInstance().get(Calendar.MONTH)
     ) {
         try {
-            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            val sanitizedBook = bookName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
-            val modeSuffix = if (reportMode == ReportMode.MONTHLY) "_bulanan" else "_tahunan"
-            val fileName = "laporan_${sanitizedBook}${modeSuffix}_$timestamp.csv"
+            val fileName = getExportFileName(bookName, reportMode, year, month, "csv")
             val file = File(context.cacheDir, fileName)
             val fileOutputStream = FileOutputStream(file)
             val writer = fileOutputStream.writer()
@@ -1198,10 +1216,7 @@ object ExportUtils {
             drawFooter(visualCanvas, pageNum, paint)
             pdfDocument.finishPage(visualPage)
 
-            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            val sanitizedBook = bookName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
-            val modeSuffix = if (reportMode == ReportMode.MONTHLY) "_bulanan" else "_tahunan"
-            val fileName = "laporan_${sanitizedBook}${modeSuffix}_$timestamp.pdf"
+            val fileName = getExportFileName(bookName, reportMode, currentYear, currentMonth, "pdf")
             val file = File(context.cacheDir, fileName)
             val fos = FileOutputStream(file)
             pdfDocument.writeTo(fos)

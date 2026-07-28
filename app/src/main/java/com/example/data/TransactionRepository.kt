@@ -9,6 +9,8 @@ class TransactionRepository(
     // Books
     val allBooks: Flow<List<Book>> = bookDao.getAllBooks()
 
+    suspend fun getAllBooksSync(): List<Book> = bookDao.getAllBooksSync()
+
     suspend fun getBookById(id: Int): Book? = bookDao.getBookById(id)
 
     suspend fun getBookByName(name: String): Book? = bookDao.getBookByName(name)
@@ -68,6 +70,9 @@ class TransactionRepository(
     // Transactions filtered by Book
     fun getAllTransactions(bookId: Int): Flow<List<Transaction>> =
         transactionDao.getAllTransactions(bookId)
+
+    suspend fun getAllTransactionsSync(): List<Transaction> =
+        transactionDao.getAllTransactionsSync()
 
     suspend fun getTransactionById(id: Int): Transaction? =
         transactionDao.getTransactionById(id)

@@ -23,6 +23,10 @@ data class ImportedTransaction(
 object BackupUtils {
 
     fun exportBackup(context: Context, transactions: List<Transaction>, bookName: String) {
+        exportBackupBook(context, transactions, bookName)
+    }
+
+    fun exportBackupBook(context: Context, transactions: List<Transaction>, bookName: String) {
         try {
             val jsonArray = JSONArray()
             for (t in transactions) {
@@ -38,8 +42,39 @@ object BackupUtils {
                 jsonArray.put(obj)
             }
             
+            val sanitized = bookName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
             val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            val fileName = "uang_siapa_backup_$timestamp.json"
+            val fileName = "uang_siapa_backup_${sanitized}_$timestamp.json"
+            val file = File(context.cacheDir, fileName)
+            val fileOutputStream = FileOutputStream(file)
+            fileOutputStream.write(jsonArray.toString(4).toByteArray())
+            fileOutputStream.close()
+            
+            shareFile(context, file, "application/json")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun exportBackupAllBooks(context: Context, items: List<ImportedTransaction>) {
+        try {
+            val jsonArray = JSONArray()
+            for (item in items) {
+                val t = item.transaction
+                val obj = JSONObject().apply {
+                    put("id", t.id)
+                    put("type", t.type.name)
+                    put("amount", t.amount)
+                    put("category", t.category)
+                    put("description", t.description)
+                    put("dateMillis", t.dateMillis)
+                    put("bookName", item.bookName)
+                }
+                jsonArray.put(obj)
+            }
+            
+            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
+            val fileName = "uang_siapa_backup_semua_buku_$timestamp.json"
             val file = File(context.cacheDir, fileName)
             val fileOutputStream = FileOutputStream(file)
             fileOutputStream.write(jsonArray.toString(4).toByteArray())

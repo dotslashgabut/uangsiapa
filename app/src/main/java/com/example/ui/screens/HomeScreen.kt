@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Clear
@@ -214,6 +215,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
@@ -298,11 +300,19 @@ fun HomeScreen(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Ekspor Backup (JSON)") },
+                                text = { Text("Ekspor Backup (Buku Ini)") },
                                 leadingIcon = { Icon(Icons.Default.Backup, contentDescription = null) },
                                 onClick = {
                                     showMenu = false
-                                    com.example.utils.BackupUtils.exportBackup(context, transactions, activeBook?.name ?: "Buku Utama")
+                                    com.example.utils.BackupUtils.exportBackupBook(context, transactions, activeBook?.name ?: "Buku Utama")
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Ekspor Backup (Semua Buku)") },
+                                leadingIcon = { Icon(Icons.Default.CloudUpload, contentDescription = null) },
+                                onClick = {
+                                    showMenu = false
+                                    viewModel.exportAllBooksBackup(context)
                                 }
                             )
                             DropdownMenuItem(

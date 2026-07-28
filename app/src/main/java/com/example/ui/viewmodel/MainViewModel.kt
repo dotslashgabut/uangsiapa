@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(private val repository: TransactionRepository) : ViewModel() {
 
-    private val _activeBook = MutableStateFlow<Book?>(null)
+    private val _activeBook = MutableStateFlow<Book?>(Book(id = 1, name = "Buku Utama", isDefault = true))
     val activeBook: StateFlow<Book?> = _activeBook.asStateFlow()
 
     val allBooks: StateFlow<List<Book>> = repository.allBooks.stateIn(
@@ -128,6 +128,20 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
                 repository.insert(lastDeleted)
                 lastDeletedTransaction = null
             }
+        }
+    }
+
+    fun exportAllBooksBackup(context: android.content.Context) {
+        viewModelScope.launch {
+            val books = repository.getAllBooksSync()
+            val booksMap = books.associateBy { it.id }
+            val allTransactions = repository.getAllTransactionsSync()
+            
+            val items = allTransactions.map { t ->
+                val bName = booksMap[t.bookId]?.name ?: "Buku Utama"
+                com.example.utils.ImportedTransaction(t, bName)
+            }
+            com.example.utils.BackupUtils.exportBackupAllBooks(context, items)
         }
     }
 

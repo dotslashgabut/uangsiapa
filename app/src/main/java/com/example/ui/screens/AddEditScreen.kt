@@ -66,6 +66,7 @@ fun AddEditScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(

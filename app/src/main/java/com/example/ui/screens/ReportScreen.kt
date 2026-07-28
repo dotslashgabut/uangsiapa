@@ -72,6 +72,7 @@ fun ReportScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(
@@ -99,7 +100,9 @@ fun ReportScreen(
                             context = context, 
                             transactions = uiState.transactions, 
                             bookName = activeBookName,
-                            reportMode = uiState.reportMode
+                            reportMode = uiState.reportMode,
+                            year = uiState.currentYear,
+                            month = uiState.currentMonth
                         ) 
                     }) {
                         Icon(Icons.Default.TableChart, contentDescription = "Ekspor CSV")
