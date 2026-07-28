@@ -43,7 +43,7 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
     private var lastDeletedTransaction: Transaction? = null
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val defaultBook = repository.getDefaultBook()
             _activeBook.value = defaultBook
         }

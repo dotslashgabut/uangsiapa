@@ -1,6 +1,8 @@
 package com.example.data
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 class TransactionRepository(
     private val transactionDao: TransactionDao,
@@ -9,34 +11,40 @@ class TransactionRepository(
     // Books
     val allBooks: Flow<List<Book>> = bookDao.getAllBooks()
 
-    suspend fun getAllBooksSync(): List<Book> = bookDao.getAllBooksSync()
+    suspend fun getAllBooksSync(): List<Book> = withContext(Dispatchers.IO) {
+        bookDao.getAllBooksSync()
+    }
 
-    suspend fun getBookById(id: Int): Book? = bookDao.getBookById(id)
+    suspend fun getBookById(id: Int): Book? = withContext(Dispatchers.IO) {
+        bookDao.getBookById(id)
+    }
 
-    suspend fun getBookByName(name: String): Book? = bookDao.getBookByName(name)
+    suspend fun getBookByName(name: String): Book? = withContext(Dispatchers.IO) {
+        bookDao.getBookByName(name)
+    }
 
-    suspend fun getDefaultBook(): Book {
+    suspend fun getDefaultBook(): Book = withContext(Dispatchers.IO) {
         val defaultBook = bookDao.getDefaultBook()
-        if (defaultBook != null) return defaultBook
+        if (defaultBook != null) return@withContext defaultBook
         
         val anyBook = bookDao.getAnyBook()
         if (anyBook != null) {
             bookDao.setDefaultBook(anyBook.id)
-            return anyBook.copy(isDefault = true)
+            return@withContext anyBook.copy(isDefault = true)
         }
         
         val newBookId = bookDao.insertBook(Book(name = "Buku Utama", isDefault = true))
-        return Book(id = newBookId.toInt(), name = "Buku Utama", isDefault = true)
+        Book(id = newBookId.toInt(), name = "Buku Utama", isDefault = true)
     }
 
-    suspend fun insertBook(book: Book): Int {
+    suspend fun insertBook(book: Book): Int = withContext(Dispatchers.IO) {
         if (book.isDefault) {
             bookDao.clearDefaultBooks()
         }
-        return bookDao.insertBook(book).toInt()
+        bookDao.insertBook(book).toInt()
     }
 
-    suspend fun updateBook(book: Book) {
+    suspend fun updateBook(book: Book) = withContext(Dispatchers.IO) {
         if (book.isDefault) {
             bookDao.clearDefaultBooks()
         }
@@ -46,7 +54,7 @@ class TransactionRepository(
         }
     }
 
-    suspend fun deleteBook(book: Book) {
+    suspend fun deleteBook(book: Book) = withContext(Dispatchers.IO) {
         bookDao.deleteBook(book)
         bookDao.deleteTransactionsByBookId(book.id)
         if (book.isDefault) {
@@ -58,7 +66,7 @@ class TransactionRepository(
         }
     }
 
-    suspend fun setDefaultBook(bookId: Int) {
+    suspend fun setDefaultBook(bookId: Int) = withContext(Dispatchers.IO) {
         bookDao.clearDefaultBooks()
         bookDao.setDefaultBook(bookId)
         val book = bookDao.getBookById(bookId)
@@ -71,24 +79,26 @@ class TransactionRepository(
     fun getAllTransactions(bookId: Int): Flow<List<Transaction>> =
         transactionDao.getAllTransactions(bookId)
 
-    suspend fun getAllTransactionsSync(): List<Transaction> =
+    suspend fun getAllTransactionsSync(): List<Transaction> = withContext(Dispatchers.IO) {
         transactionDao.getAllTransactionsSync()
+    }
 
-    suspend fun getTransactionById(id: Int): Transaction? =
+    suspend fun getTransactionById(id: Int): Transaction? = withContext(Dispatchers.IO) {
         transactionDao.getTransactionById(id)
+    }
 
     fun getTransactionsBetween(bookId: Int, startMillis: Long, endMillis: Long): Flow<List<Transaction>> =
         transactionDao.getTransactionsBetween(bookId, startMillis, endMillis)
 
-    suspend fun insert(transaction: Transaction) {
+    suspend fun insert(transaction: Transaction) = withContext(Dispatchers.IO) {
         transactionDao.insertTransaction(transaction)
     }
 
-    suspend fun update(transaction: Transaction) {
+    suspend fun update(transaction: Transaction) = withContext(Dispatchers.IO) {
         transactionDao.updateTransaction(transaction)
     }
 
-    suspend fun delete(transaction: Transaction) {
+    suspend fun delete(transaction: Transaction) = withContext(Dispatchers.IO) {
         transactionDao.deleteTransaction(transaction)
     }
 }
