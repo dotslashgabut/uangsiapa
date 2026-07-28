@@ -143,8 +143,13 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
                 val targetBookName = if (bName.isEmpty()) defaultBookName else bName
 
                 val bookId = bookCache.getOrPut(targetBookName) {
-                    val uniqueName = getUniqueBookName(targetBookName)
-                    repository.insertBook(Book(name = uniqueName, isDefault = false))
+                    val existingBook = repository.getBookByName(targetBookName)
+                    if (existingBook != null) {
+                        existingBook.id
+                    } else {
+                        val uniqueName = getUniqueBookName(targetBookName)
+                        repository.insertBook(Book(name = uniqueName, isDefault = false))
+                    }
                 }
                 repository.insert(item.transaction.copy(id = 0, bookId = bookId))
             }

@@ -1,51 +1,57 @@
-# Uang Siapa? 💸
+# Uang Siapa? 💸 (Versi 1.1)
 
 <img src="./icon.svg" width="128" height="128" />
 
-Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untuk membantu pengguna melacak pendapatan (uang masuk) dan pengeluaran (uang keluar) dengan mudah, aman, dan sepenuhnya offline. Aplikasi ini mendukung visualisasi data, analisis kategori, serta ekspor laporan ke berbagai format populer (PDF, Excel, CSV).
+Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untuk membantu pengguna melacak pendapatan (uang masuk) dan pengeluaran (uang keluar) dengan mudah, aman, dan sepenuhnya offline. Aplikasi ini mendukung visualisasi data, analisis kategori, pencarian data interaktif, serta ekspor laporan ke berbagai format populer (PDF, Excel, CSV).
 
 ---
 
-## 🌟 Fitur Utama
+## 🌟 Fitur Utama (Pembaruan Versi 1.1)
 
-### 1. **Pencatatan Keuangan Presisi (Terbaru)**
-- Tambah, ubah, dan hapus transaksi dengan nominal, kategori, keterangan, dan tanggal yang fleksibel.
-- Dukungan format mata uang Rupiah (Rp) yang diformat secara otomatis selama pengetikan.
-- **Saran Kategori Cerdas (Dropdown):** Kolom kategori kini dilengkapi dengan tombol dropdown yang menyajikan daftar saran kategori siap pakai secara dinamis (berbeda untuk "Uang Masuk" dan "Uang Keluar") guna mempercepat input data tanpa mengetik ulang.
-- **Pembersihan Kategori Otomatis:** Saat beralih tab antara "Uang Masuk" dan "Uang Keluar", kolom input kategori akan otomatis dibersihkan untuk mencegah salah pilih kategori lintas tipe transaksi.
-- **Keterangan Default Minimalis:** Pengisian transaksi yang tidak menyertakan keterangan kini akan otomatis diatur ke nilai default `-` (strip) untuk menjaga kerapian visual di layar riwayat transaksi.
-- Swipe to gesture (Geser ke Kiri untuk Hapus, Geser ke Kanan untuk Edit).
-- Tampilan riwayat transaksi yang rapi di mana tanggal diformat detail hingga jam-menit (`dd MMM yyyy, HH:mm`) dan keterangan diposisikan tepat di bawah tanggal untuk readability optimal.
+### 1. **Pencarian Data & Keterangan Interaktif (Baru di v1.1)**
+- **Kotak Pencarian Serbaguna & Kompak:** Mencakup pencarian seluruh teks transaksi (keterangan/deskripsi, nama kategori, hingga angka nominal rupiah) dengan desain ringkas dan nyaman dipandang.
+- **Tombol Hapus Teks Cepat:** Dilengkapi tombol ikon 'X' untuk menghapus kata kunci pencarian secara instan.
+- **Pembersihan Fokus Otomatis (Auto Keyboard Dismiss):** Kursor pencarian dan keyboard otomatis tertutup/nonaktif secara cerdas ketika pengguna melakukan ketukan (tap) di area luar kotak pencarian atau saat menggeser (scroll) daftar transaksi.
+- **Kombinasi Filter & Reset Total:** Dapat dikombinasikan dengan filter tipe transaksi (Masuk/Keluar), filter kategori, dan filter rentang tanggal. Tombol **Reset** secara otomatis menghapus seluruh filter aktif dan pencarian kata kunci sekaligus dalam satu klik.
 
-### 2. **Filter & Pencarian Pintar (Terbaru)**
-- **Filter Tipe Transaksi:** Saring transaksi langsung di layar utama berdasarkan "Semua", "Uang Masuk", atau "Uang Keluar".
-- **Filter Kategori Dinamis:** Saring transaksi berdasarkan kategori yang pernah dibuat secara otomatis tanpa konfigurasi manual.
-- **Tata Letak Konsisten & Responsif:** Dropdown tanggal, filter tipe, dan filter kategori kini disusun secara rapi mengisi seluruh lebar layar dengan proporsi grid yang seimbang dan fungsional.
-- **Tombol Reset Tanggal Cepat:** Dilengkapi tombol pintas "Reset" tanggal yang dinamis dan tetap terlihat guna memudahkan pengguna kembali ke tampilan semua data.
-- **Ringkasan Filter Aktif Presisi:** Menampilkan rekapitulasi data terfilter ("Masuk", "Keluar", dan "Selisih" di baris baru yang rapi) secara instan ketika filter aktif digunakan.
+### 2. **Mode View Detail & Pencegahan Edit Tak Sengaja (Baru di v1.1)**
+- **Tampilan Detail Transaksi (Read-Only Mode):** Mengetuk/memilih baris transaksi kini membuka dialog rincian transaksi lengkap (nominal, kategori, waktu/tanggal, dan keterangan) untuk mencegah pengeditan yang tidak disengaja.
+- **Aksi Terbimbing & Tata Letak Ergonomis:** Dalam dialog rincian detail dan informasi aplikasi, tombol tutup ditempatkan sebagai ikon **'X'** di pojok kanan atas pop-up. Pada bagian bawah dialog rincian detail, tombol **Hapus** (merah) ditempatkan di sisi kiri dan tombol **Edit** (biru) di sisi kanan secara simetris untuk pemisahan aksi yang jelas.
+- **Desain Dialog & Pop-up Modern:** Seluruh dialog/pop-up konfirmasi (Hapus Transaksi, Kelola Buku Keuangan, Pemilihan Bulan & Tahun Laporan, Rentang Tanggal, dan Informasi Aplikasi) telah diperbarui dengan ikon visual melingkar di bagian atas, tombol tutup **'X'** di pojok kanan atas, serta tata letak tombol M3 yang seragam dan konsisten.
+- **Kategori "Saldo Awal":** Ditambahkan pada daftar saran pilihan Uang Masuk untuk memudahkan pencatatan modal/saldo awal buku keuangan.
+- **Kategori "Pindah Kas":** Ditambahkan pada pilihan Uang Masuk dan Uang Keluar untuk memfasilitasi transfer/pemindahan dana antar rekening atau kas secara terstruktur.
+- **Saran Kategori Cerdas (Dropdown):** Kolom kategori dilengkapi dengan tombol dropdown saran kategori siap pakai.
+- **Pembersihan Kategori Otomatis:** Saat beralih tab antara "Uang Masuk" dan "Uang Keluar", kolom input kategori otomatis dibersihkan.
+- **Keterangan Default Minimalis:** Pengisian transaksi tanpa keterangan otomatis diatur ke nilai default `-` (strip).
+- Swipe gesture (Geser ke Kiri untuk Hapus, Geser ke Kanan untuk Edit).
 
-### 3. **Laporan Bulanan & Tahunan Interaktif**
-- **Ringkasan Visual Bulanan:** Grafik batang minimalis yang membandingkan total pemasukan dan pengeluaran bulan berjalan.
-- **Ringkasan Visual Tahunan:** Grafik komparatif 12 bulan penuh (Januari sampai Desember) untuk memudahkan analisis tren keuangan jangka panjang.
-- **Analisis Persentase Kategori:** Breakdown persentase kontribusi per kategori pengeluaran dan pemasukan dengan indikator progres bar warna-warni yang estetik.
+### 3. **Filter & Pencarian Pintar**
+- **Filter Tipe Transaksi:** Saring transaksi berdasarkan "Semua", "Uang Masuk", atau "Uang Keluar".
+- **Filter Kategori Dinamis:** Saring transaksi berdasarkan kategori yang pernah dibuat secara otomatis.
+- **Tata Letak Konsisten & Responsif:** Dropdown tanggal, filter tipe, dan filter kategori disusun dalam proporsi grid yang seimbang.
+- **Tombol Reset Tanggal & Pencarian:** Tombol pintas untuk mengembalikan tampilan ke seluruh data transaksi.
+- **Ringkasan Filter Aktif Presisi:** Menampilkan rekapitulasi data terfilter ("Masuk", "Keluar", dan "Selisih") secara instan ketika filter atau pencarian aktif.
 
-### 4. **Ekspor Laporan Profesional & Rekapitulasi Excel (Terbaru)**
-- **PDF Export Berwarna:** Hasilkan dokumen PDF resmi dengan judul dinamis seperti `Laporan Keuangan Bulan [Bulan/Tahun]` atau `Laporan Keuangan Tahun [Tahun]`.
-- **Grafik Visual PDF:** Jika mengekspor laporan tahunan, PDF akan secara otomatis menyertakan visualisasi grafik batang 12 bulan penuh di halaman analisis.
-- **Batasan Kategori di PDF:** Halaman analisis grafis PDF membatasi tampilan analisis kategori hingga maksimal **15 kategori teratas** (14 kategori dengan nominal terbesar, sisanya secara otomatis digabungkan ke dalam kategori "Lainnya") guna menjaga kerapian dan keterbacaan tata letak grafis agar tidak saling tumpang tindih.
-- **Excel (.xlsx) & CSV:** Dukungan penuh ekspor tabel transaksi terperinci dengan style zebra-striping dan format mata uang ke file Excel serta CSV.
-- **Sheet Rekapitulasi Bulanan di Excel (Terbaru):** Ekspor Excel Bulanan kini dilengkapi lembar rekap harian dinamis (misal: `"Rekap Juli 2026"`) yang menampilkan sebaran transaksi per kategori per hari (1 sampai maks-hari) untuk uang masuk dan keluar, beserta perhitungan total harian dan total baris Sisa Saldo (Surplus).
-- **Sheet Rekapitulasi Tahunan di Excel (Terbaru):** Lembar rekap tahunan kini dinamai secara jelas dan presisi seperti `"Rekap Tahun 2026"` (menggantikan nama sebelumnya) yang meringkas arus kas per kategori per bulan dalam format matriks tahunan.
+### 4. **Optimasi Rotasi Lanskap & Display Cutout (Baru di v1.1)**
+- **Penanganan Orientasi Lanskap 180°:** Dukungan mode layout cutout `SHORT_EDGES` / `ALWAYS` dan penanganan `onConfigurationChanged` dinamis untuk memastikan tampilan aplikasi penuh tanpa terpotong atau menyisakan blok hitam pada rotasi landscape 90° maupun -90° di perangkat Android lama dan baru.
+- **Display Insets & Safe Drawing:** Penambahan `safeDrawing` insets pada `Scaffold` dan FAB untuk kenyamanan navigasi.
 
-### 5. **Sample Buku & Data Simulasi Instan (Terbaru)**
-- **Buat Sample Buku Sekali Klik:** Memungkinkan pengguna membuat buku keuangan contoh bernama `"Sample Buku"` yang langsung diisi dengan 21 transaksi simulasi realistis dari Januari hingga Juli 2026.
-- **Nominal Realistis Sesuai UMP:** Transaksi gaji pada Sample Buku disesuaikan secara realistis sebesar Rp3.000.000,- per bulan mengikuti rata-rata Upah Minimum Provinsi (UMP).
-- **Ajakan Interaktif:** Jika belum ada transaksi sama sekali, layar utama menampilkan ajakan yang interaktif beserta tombol pintas untuk langsung membuat Sample Buku agar pengguna bisa langsung mengeksplorasi visualisasi laporan dan analisis diagram secara instan.
+### 5. **Laporan Bulanan & Tahunan Interaktif**
+- **Ringkasan Visual Bulanan:** Grafik batang minimalis membandingkan total pemasukan dan pengeluaran bulan berjalan.
+- **Ringkasan Visual Tahunan:** Grafik komparatif 12 bulan penuh (Januari-Desember) untuk analisis tren keuangan jangka panjang.
+- **Analisis Persentase Kategori:** Breakdown persentase kontribusi per kategori dengan indikator progres bar warna-warni.
 
-### 6. **Backup & Restore Data Pintar (Multi-Buku - Terbaru)**
-- **Ekspor JSON Multi-Buku:** Amankan data keuangan Anda secara lokal dengan mengekspor seluruh transaksi lengkap dengan informasi nama buku asal masing-masing transaksi ke dalam satu file cadangan berformat JSON.
-- **Impor Cerdas Tanpa Konflik:** Ketika memulihkan cadangan, sistem secara otomatis melacak dan mengelompokkan transaksi ke buku yang sesuai berdasarkan namanya. Jika buku asal transaksi tersebut tidak ditemukan (misalnya telah dihapus), sistem akan otomatis membuat kembali buku tersebut secara dinamis tanpa merusak data atau menimpa transaksi pada buku lain yang aktif. Hal ini menjamin integritas pembukuan terpisah Anda tetap terjaga dengan sempurna.
-- **Pencegahan Nama Buku Duplikat (Case-Insensitive):** Guna menghindari konflik data saat pembuatan buku, penamaan sample buku, pengeditan/rename nama buku, maupun saat proses impor JSON, sistem akan mendeteksi nama buku yang sama secara case-insensitive. Jika ditemukan konflik nama, sistem otomatis menambahkan sufiks angka seperti ` (1)`, ` (2)`, dan seterusnya secara cerdas, menjaga data antar buku keuangan tetap terisolasi dengan rapi.
+### 6. **Ekspor Laporan Profesional & Rekapitulasi Excel**
+- **PDF Export Berwarna:** Hasilkan dokumen PDF resmi dengan judul dinamis `Laporan Keuangan Bulan [Bulan/Tahun]` atau `Laporan Keuangan Tahun [Tahun]`.
+- **Grafik Visual PDF:** Ekspor laporan tahunan otomatis menyertakan visualisasi grafik batang 12 bulan penuh.
+- **Batasan Kategori di PDF:** Membatasi analisis kategori hingga maksimal 15 kategori teratas (14 kategori terbesar + "Lainnya").
+- **Excel (.xlsx) & CSV:** Dukungan penuh ekspor tabel transaksi terperinci dengan style zebra-striping dan format mata uang.
+- **Sheet Rekapitulasi Bulanan & Tahunan Excel:** Lembar rekap harian per kategori (`"Rekap Juli 2026"`) dan rekap matriks tahunan (`"Rekap Tahun 2026"`).
+
+### 7. **Backup & Restore Data Pintar (Multi-Buku)**
+- **Ekspor JSON Multi-Buku:** Amankan data keuangan dengan mengekspor seluruh transaksi lengkap dengan nama buku asal.
+- **Impor Cerdas Tanpa Konflik:** Melacak dan mengelompokkan transaksi ke buku asal secara otomatis saat restore.
+- **Pencegahan Nama Buku Duplikat (Case-Insensitive):** Otomatis menambahkan sufiks angka ` (1)`, ` (2)` jika ditemukan konflik nama buku.
 
 ### 7. **Tema Gelap & Terang Dinamis & Optimasi Lanskap (Terbaru)**
 - **Gradient Total Saldo Premium:** Kotak ringkasan total saldo utama kini dibalut dengan gradasi warna linear (gradient) 3-stop yang modern, sangat estetik, dan nyaman di mata:

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,6 +34,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -62,6 +65,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.DateRange
@@ -73,6 +77,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.ImeAction
 import com.example.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -102,6 +111,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     
     var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
+    var transactionForDetail by remember { mutableStateOf<Transaction?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
 
@@ -110,6 +120,7 @@ fun HomeScreen(
     var selectedDateFilterType by remember { mutableStateOf<DateFilterType>(DateFilterType.ALL) }
     var customStartDate by remember { mutableStateOf<Long?>(null) }
     var customEndDate by remember { mutableStateOf<Long?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
     
     var showTypeMenu by remember { mutableStateOf(false) }
     var showCategoryMenu by remember { mutableStateOf(false) }
@@ -129,7 +140,10 @@ fun HomeScreen(
         }
     }
 
-    val filteredTransactions = remember(transactions, selectedTypeFilter, selectedCategoryFilter, selectedDateFilterType, customStartDate, customEndDate) {
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
+    val currentMonthYear = remember { SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(Date()) }
+
+    val filteredTransactions = remember(transactions, selectedTypeFilter, selectedCategoryFilter, selectedDateFilterType, customStartDate, customEndDate, searchQuery) {
         transactions.filter { t ->
             val matchesType = selectedTypeFilter == null || t.type == selectedTypeFilter
             val matchesCategory = selectedCategoryFilter == "Semua" || t.category.trim().equals(selectedCategoryFilter.trim(), ignoreCase = true)
@@ -152,7 +166,22 @@ fun HomeScreen(
                     t.dateMillis in start..end
                 }
             }
-            matchesType && matchesCategory && matchesDate
+
+            val query = searchQuery.trim()
+            val matchesSearch = if (query.isEmpty()) {
+                true
+            } else {
+                try {
+                    t.description.contains(query, ignoreCase = true) ||
+                    t.category.contains(query, ignoreCase = true) ||
+                    t.amount.toLong().toString().contains(query) ||
+                    currencyFormat.format(t.amount).contains(query, ignoreCase = true)
+                } catch (e: Exception) {
+                    false
+                }
+            }
+
+            matchesType && matchesCategory && matchesDate && matchesSearch
         }
     }
 
@@ -183,9 +212,6 @@ fun HomeScreen(
             }
         }
     }
-
-    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
-    val currentMonthYear = remember { SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(Date()) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -318,6 +344,14 @@ fun HomeScreen(
         }
     ) { paddingValues ->
         val listState = rememberLazyListState()
+        val focusManager = LocalFocusManager.current
+
+        LaunchedEffect(listState.isScrollInProgress) {
+            if (listState.isScrollInProgress) {
+                focusManager.clearFocus()
+            }
+        }
+
         val showCompactHeader by remember {
             derivedStateOf {
                 listState.firstVisibleItemIndex > 0
@@ -328,6 +362,11 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
         ) {
             LazyColumn(
                 state = listState,
@@ -478,6 +517,54 @@ fun HomeScreen(
                 }
             }
 
+            // Kotak Pencarian Data
+            item {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 6.dp, end = 16.dp, bottom = 2.dp),
+                    placeholder = {
+                        Text(
+                            "Cari transaksi, keterangan, kategori...",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Cari",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Hapus teks pencarian",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.12f)
+                    )
+                )
+            }
+
             // Row Filter Gabungan
             item {
                 Column(
@@ -598,15 +685,25 @@ fun HomeScreen(
                             )
                         }
 
-                        // Tombol Reset Tanggal
+                        // Tombol Reset Seluruh Filter
                         Box(modifier = Modifier.weight(0.9f)) {
+                            val isAnyFilterActive = selectedDateFilterType != DateFilterType.ALL ||
+                                selectedTypeFilter != null ||
+                                selectedCategoryFilter != "Semua" ||
+                                searchQuery.isNotEmpty() ||
+                                customStartDate != null ||
+                                customEndDate != null
+
                             AssistChip(
                                 onClick = {
                                     selectedDateFilterType = DateFilterType.ALL
+                                    selectedTypeFilter = null
+                                    selectedCategoryFilter = "Semua"
                                     customStartDate = null
                                     customEndDate = null
+                                    searchQuery = ""
                                 },
-                                enabled = selectedDateFilterType != DateFilterType.ALL,
+                                enabled = isAnyFilterActive,
                                 modifier = Modifier.fillMaxWidth(),
                                 label = {
                                     Text(
@@ -618,13 +715,13 @@ fun HomeScreen(
                                 leadingIcon = {
                                     Icon(
                                         imageVector = Icons.Default.Refresh,
-                                        contentDescription = "Reset",
+                                        contentDescription = "Reset Filter",
                                         modifier = Modifier.size(16.dp)
                                     )
                                 },
                                 border = androidx.compose.foundation.BorderStroke(
                                     1.dp,
-                                    if (selectedDateFilterType != DateFilterType.ALL) MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
+                                    if (isAnyFilterActive) MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
                                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                                 )
                             )
@@ -740,7 +837,7 @@ fun HomeScreen(
             }
 
             // Ringkasan Filter Aktif (Kotak Baru / Sementara)
-            if (selectedTypeFilter != null || selectedCategoryFilter != "Semua" || selectedDateFilterType != DateFilterType.ALL) {
+            if (selectedTypeFilter != null || selectedCategoryFilter != "Semua" || selectedDateFilterType != DateFilterType.ALL || searchQuery.isNotEmpty()) {
                 item {
                     Card(
                         modifier = Modifier
@@ -789,6 +886,7 @@ fun HomeScreen(
                                             selectedDateFilterType = DateFilterType.ALL
                                             customStartDate = null
                                             customEndDate = null
+                                            searchQuery = ""
                                         }
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
@@ -961,6 +1059,7 @@ fun HomeScreen(
                                 transactionToDelete = transactionToDelete,
                                 onDelete = { transactionToDelete = transaction },
                                 onEdit = { onNavigateToAddEdit(transaction.id) },
+                                onViewDetail = { transactionForDetail = transaction },
                                 currencyFormat = currencyFormat,
                                 isDark = isDark
                             )
@@ -989,10 +1088,96 @@ fun HomeScreen(
 
     if (transactionToDelete != null) {
         val t = transactionToDelete!!
+        val isIncome = t.type == TransactionType.INCOME
+        val amountColor = if (isIncome) {
+            if (isDark) IncomeColorDark else IncomeColorLight
+        } else {
+            if (isDark) ExpenseColorDark else ExpenseColorLight
+        }
+        val dateFormat = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID")) }
+
         AlertDialog(
             onDismissRequest = { transactionToDelete = null },
-            title = { Text("Hapus Transaksi") },
-            text = { Text("Apakah Anda yakin ingin menghapus transaksi ini?") },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.errorContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Hapus Transaksi",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Apakah Anda yakin ingin menghapus transaksi ini?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = t.category,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "${if (isIncome) "+" else "-"}${currencyFormat.format(t.amount)}",
+                                    fontWeight = FontWeight.Bold,
+                                    color = amountColor,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            if (t.description.isNotBlank()) {
+                                Text(
+                                    text = t.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Text(
+                                text = dateFormat.format(Date(t.dateMillis)),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                }
+            },
             confirmButton = {
                 Button(
                     onClick = {
@@ -1009,14 +1194,22 @@ fun HomeScreen(
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text("Hapus", color = MaterialTheme.colorScheme.onError)
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { transactionToDelete = null }
+                OutlinedButton(
+                    onClick = { transactionToDelete = null },
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Batal")
                 }
@@ -1024,63 +1217,90 @@ fun HomeScreen(
         )
     }
 
+    if (transactionForDetail != null) {
+        val t = transactionForDetail!!
+        TransactionDetailDialog(
+            transaction = t,
+            currencyFormat = currencyFormat,
+            isDark = isDark,
+            onDismiss = { transactionForDetail = null },
+            onEdit = {
+                transactionForDetail = null
+                onNavigateToAddEdit(t.id)
+            },
+            onDelete = {
+                transactionForDetail = null
+                transactionToDelete = t
+            }
+        )
+    }
+
     if (showBookManager) {
         AlertDialog(
             onDismissRequest = { showBookManager = false },
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            icon = {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Kelola Buku Keuangan", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                    IconButton(
-                        onClick = { showAddBookDialog = true }
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .align(Alignment.Center),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Tambah Buku Baru", tint = MaterialTheme.colorScheme.primary)
+                        Icon(
+                            imageVector = Icons.Default.MenuBook,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = { showBookManager = false },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 12.dp, y = (-12).dp)
+                            .size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Tutup",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
+            },
+            title = {
+                Text(
+                    text = "Kelola Buku Keuangan",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
             },
             text = {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 400.dp)
-                        .verticalScroll(rememberScrollState())
+                        .heightIn(max = 420.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Button to generate a sample book with 20 dummy transactions
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                            .clickable {
-                                viewModel.insertSampleBook()
-                                showBookManager = false
-                            }
+                    // Button to add a new book
+                    Button(
+                        onClick = { showAddBookDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MenuBook,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Buat Sample Buku (20 Transaksi)",
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Tambah Buku Baru")
                     }
 
                     allBooks.forEach { book ->
@@ -1095,6 +1315,7 @@ fun HomeScreen(
                                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                 }
                             ),
+                            shape = RoundedCornerShape(12.dp),
                             border = if (book.isDefault && !isSelected) {
                                 androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
                             } else {
@@ -1102,7 +1323,6 @@ fun HomeScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp)
                                 .clickable {
                                     viewModel.selectBook(book)
                                     showBookManager = false
@@ -1111,7 +1331,7 @@ fun HomeScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp),
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -1169,13 +1389,45 @@ fun HomeScreen(
                             }
                         }
                     }
+
+                    // Button to generate a sample book with 20 dummy transactions
+                    OutlinedCard(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp)
+                            .clickable {
+                                viewModel.insertSampleBook()
+                                showBookManager = false
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Buat Sample Buku (20 Transaksi)",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+                    }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showBookManager = false }) {
-                    Text("Tutup")
-                }
-            }
+            confirmButton = {}
         )
     }
 
@@ -1184,17 +1436,40 @@ fun HomeScreen(
         var isDefaultInput by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { showAddBookDialog = false },
-            title = { Text("Tambah Buku Baru", fontWeight = FontWeight.Bold) },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Tambah Buku Baru",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            },
             text = {
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
                         value = bookNameInput,
                         onValueChange = { bookNameInput = it },
                         label = { Text("Nama Buku") },
                         singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { isDefaultInput = !isDefaultInput }
@@ -1204,7 +1479,7 @@ fun HomeScreen(
                             onCheckedChange = { isDefaultInput = it }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Jadikan sebagai Buku Default")
+                        Text("Jadikan sebagai Buku Default", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             },
@@ -1215,13 +1490,17 @@ fun HomeScreen(
                             viewModel.insertBook(bookNameInput.trim(), isDefaultInput)
                             showAddBookDialog = false
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Simpan")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddBookDialog = false }) {
+                OutlinedButton(
+                    onClick = { showAddBookDialog = false },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Text("Batal")
                 }
             }
@@ -1233,7 +1512,30 @@ fun HomeScreen(
         var bookNameInput by remember { mutableStateOf(targetBook.name) }
         AlertDialog(
             onDismissRequest = { showEditBookDialog = null },
-            title = { Text("Ubah Nama Buku", fontWeight = FontWeight.Bold) },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Ubah Nama Buku",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            },
             text = {
                 Column {
                     OutlinedTextField(
@@ -1241,6 +1543,7 @@ fun HomeScreen(
                         onValueChange = { bookNameInput = it },
                         label = { Text("Nama Buku") },
                         singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -1252,13 +1555,17 @@ fun HomeScreen(
                             viewModel.updateBook(targetBook.copy(name = bookNameInput.trim()))
                             showEditBookDialog = null
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Simpan")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEditBookDialog = null }) {
+                OutlinedButton(
+                    onClick = { showEditBookDialog = null },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Text("Batal")
                 }
             }
@@ -1269,23 +1576,90 @@ fun HomeScreen(
         val targetBook = showDeleteBookConfirm!!
         AlertDialog(
             onDismissRequest = { showDeleteBookConfirm = null },
-            title = { Text("Hapus Buku Keuangan", fontWeight = FontWeight.Bold) },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.errorContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Hapus Buku Keuangan",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            },
             text = {
-                Text("Apakah Anda yakin ingin menghapus buku \"${targetBook.name}\"? Semua data transaksi di dalam buku ini akan dihapus secara permanen.")
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "Apakah Anda yakin ingin menghapus buku ini?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = targetBook.name,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+
+                    Text(
+                        text = "Semua data transaksi di dalam buku ini akan dihapus secara permanen.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             },
             confirmButton = {
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    shape = RoundedCornerShape(12.dp),
                     onClick = {
                         viewModel.deleteBook(targetBook)
                         showDeleteBookConfirm = null
                     }
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text("Hapus", color = MaterialTheme.colorScheme.onError)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteBookConfirm = null }) {
+                OutlinedButton(
+                    onClick = { showDeleteBookConfirm = null },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Text("Batal")
                 }
             }
@@ -1336,12 +1710,35 @@ fun HomeScreen(
         val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale("id", "ID")) }
         AlertDialog(
             onDismissRequest = { showCustomDateDialog = false },
-            title = { Text("Pilih Rentang Tanggal", fontWeight = FontWeight.Bold) },
+            icon = {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            },
+            title = {
+                Text(
+                    text = "Pilih Rentang Tanggal",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
+            },
             text = {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     // Start Date picker field
@@ -1355,7 +1752,8 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         OutlinedCard(
                             onClick = { startDatePickerDialog.show() },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -1389,7 +1787,8 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         OutlinedCard(
                             onClick = { endDatePickerDialog.show() },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -1423,13 +1822,17 @@ fun HomeScreen(
                             showCustomDateDialog = false
                         }
                     },
-                    enabled = tempStartDate != null && tempEndDate != null
+                    enabled = tempStartDate != null && tempEndDate != null,
+                    shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Terapkan")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showCustomDateDialog = false }) {
+                OutlinedButton(
+                    onClick = { showCustomDateDialog = false },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
                     Text("Batal")
                 }
             }
@@ -1440,25 +1843,59 @@ fun HomeScreen(
         val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
         AlertDialog(
             onDismissRequest = { showInfoDialog = false },
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            icon = {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text("Tentang Uang Siapa?", fontWeight = FontWeight.Bold)
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .align(Alignment.Center),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = { showInfoDialog = false },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 12.dp, y = (-12).dp)
+                            .size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Tutup",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
+            },
+            title = {
+                Text(
+                    text = "Tentang Uang Siapa?",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
+                )
             },
             text = {
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    Text(
+                        text = "Uang Siapa? — Versi 1.1",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                     Text(
                         text = "Aplikasi pencatatan keuangan pribadi yang simpel, aman, dan 100% offline.",
                         style = MaterialTheme.typography.bodyMedium,
@@ -1538,11 +1975,7 @@ fun HomeScreen(
                     }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showInfoDialog = false }) {
-                    Text("Tutup", fontWeight = FontWeight.Bold)
-                }
-            }
+            confirmButton = {}
         )
     }
 }
@@ -1554,6 +1987,7 @@ fun TransactionItemWithSwipe(
     transactionToDelete: Transaction?,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
+    onViewDetail: () -> Unit,
     currencyFormat: NumberFormat,
     isDark: Boolean
 ) {
@@ -1629,7 +2063,8 @@ fun TransactionItemWithSwipe(
                         currencyFormat = currencyFormat, 
                         isDark = isDark,
                         onEdit = onEdit,
-                        onDelete = onDelete
+                        onDelete = onDelete,
+                        onViewDetail = onViewDetail
                     )
                 }
             }
@@ -1643,7 +2078,8 @@ fun TransactionCard(
     currencyFormat: NumberFormat, 
     isDark: Boolean,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onViewDetail: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID")) }
     val isIncome = transaction.type == TransactionType.INCOME
@@ -1680,7 +2116,7 @@ fun TransactionCard(
             .fillMaxWidth()
             .padding(vertical = 3.dp)
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-            .clickable { onEdit() },
+            .clickable { onViewDetail() },
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         shape = RoundedCornerShape(16.dp)
@@ -1758,6 +2194,21 @@ fun TransactionCard(
                     onDismissRequest = { showItemMenu = false }
                 ) {
                     DropdownMenuItem(
+                        text = { Text("Lihat Detail", fontSize = 13.sp) },
+                        leadingIcon = { 
+                            Icon(
+                                Icons.Default.Info, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            ) 
+                        },
+                        onClick = {
+                            showItemMenu = false
+                            onViewDetail()
+                        }
+                    )
+                    DropdownMenuItem(
                         text = { Text("Edit Transaksi", fontSize = 13.sp) },
                         leadingIcon = { 
                             Icon(
@@ -1791,6 +2242,235 @@ fun TransactionCard(
             }
         }
     }
+}
+
+@Composable
+fun TransactionDetailDialog(
+    transaction: Transaction,
+    currencyFormat: NumberFormat,
+    isDark: Boolean,
+    onDismiss: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val dateFormat = remember { SimpleDateFormat("EEEE, dd MMMM yyyy • HH:mm", Locale("id", "ID")) }
+    val isIncome = transaction.type == TransactionType.INCOME
+    val (categoryIcon, iconBgColor) = getCategoryIconAndColor(transaction.category, isIncome, isDark)
+    
+    val amountColor = if (isIncome) {
+        if (isDark) IncomeColorDark else IncomeColorLight
+    } else {
+        if (isDark) ExpenseColorDark else ExpenseColorLight
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(iconBgColor)
+                        .align(Alignment.Center),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = categoryIcon,
+                        contentDescription = null,
+                        tint = amountColor,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = 12.dp, y = (-12).dp)
+                        .size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Tutup",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        title = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = transaction.category,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Surface(
+                    color = iconBgColor.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = if (isIncome) "Uang Masuk" else "Uang Keluar",
+                        color = amountColor,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Large Amount Display Card
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 14.dp, horizontal = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Nominal",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "${if (isIncome) "+" else "-"}${currencyFormat.format(transaction.amount)}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = amountColor,
+                            fontSize = 22.sp
+                        )
+                    }
+                }
+
+                // Details
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Date & Time
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DateRange,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Waktu",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = dateFormat.format(Date(transaction.dateMillis)),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.End
+                        )
+                    }
+
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                    // Description
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Keterangan",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = if (transaction.description.isNotBlank()) transaction.description else "-",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Normal,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(start = 26.dp)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        onDismiss()
+                        onDelete()
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Hapus")
+                }
+
+                Button(
+                    onClick = {
+                        onDismiss()
+                        onEdit()
+                    },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Edit")
+                }
+            }
+        },
+        dismissButton = null
+    )
 }
 
 @Composable
