@@ -2036,8 +2036,8 @@ fun TransactionItemWithSwipe(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .padding(vertical = 1.5.dp)
+                        .clip(RoundedCornerShape(14.dp))
                         .background(color)
                         .padding(horizontal = 20.dp),
                     contentAlignment = alignment
@@ -2114,23 +2114,23 @@ fun TransactionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 3.dp)
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
+            .padding(vertical = 2.dp)
+            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
             .clickable { onViewDetail() },
         colors = CardDefaults.cardColors(containerColor = containerColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(16.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
                     .background(iconBgColor),
                 contentAlignment = Alignment.Center
@@ -2150,7 +2150,7 @@ fun TransactionCard(
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = if (transaction.description.isNotBlank()) transaction.description else (if (isIncome) "Pendapatan" else "Pengeluaran"), 
                     fontSize = 12.sp, 
@@ -2166,7 +2166,7 @@ fun TransactionCard(
             
             Surface(
                 color = iconBgColor.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     text = "${if (isIncome) "+" else "-"}${currencyFormat.format(transaction.amount)}",
