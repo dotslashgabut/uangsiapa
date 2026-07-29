@@ -144,23 +144,23 @@ fun HomeScreen(
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
     val currentMonthYear = remember { SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(Date()) }
 
-    val filteredTransactions = remember(transactions, selectedTypeFilter, selectedCategoryFilter, selectedDateFilterType, customStartDate, customEndDate, searchQuery) {
+    val nowMillis = remember { System.currentTimeMillis() }
+    val todayStart = remember(nowMillis) { startOfDay(nowMillis) }
+    val todayEnd = remember(nowMillis) { endOfDay(nowMillis) }
+    val monthStart = remember(nowMillis) { startOfMonth(nowMillis) }
+    val monthEnd = remember(nowMillis) { endOfMonth(nowMillis) }
+    val sevenDaysStart = remember(nowMillis) { startOfDay(nowMillis - (7 * 24 * 60 * 60 * 1000L)) }
+
+    val filteredTransactions = remember(transactions, selectedTypeFilter, selectedCategoryFilter, selectedDateFilterType, customStartDate, customEndDate, searchQuery, todayStart, todayEnd, monthStart, monthEnd, sevenDaysStart) {
         transactions.filter { t ->
             val matchesType = selectedTypeFilter == null || t.type == selectedTypeFilter
             val matchesCategory = selectedCategoryFilter == "Semua" || t.category.trim().equals(selectedCategoryFilter.trim(), ignoreCase = true)
             
             val matchesDate = when (selectedDateFilterType) {
                 DateFilterType.ALL -> true
-                DateFilterType.TODAY -> {
-                    isSameDay(t.dateMillis, System.currentTimeMillis())
-                }
-                DateFilterType.LAST_7_DAYS -> {
-                    val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
-                    t.dateMillis >= startOfDay(sevenDaysAgo)
-                }
-                DateFilterType.THIS_MONTH -> {
-                    isSameMonthAndYear(t.dateMillis, System.currentTimeMillis())
-                }
+                DateFilterType.TODAY -> t.dateMillis in todayStart..todayEnd
+                DateFilterType.LAST_7_DAYS -> t.dateMillis >= sevenDaysStart
+                DateFilterType.THIS_MONTH -> t.dateMillis in monthStart..monthEnd
                 DateFilterType.CUSTOM -> {
                     val start = customStartDate?.let { startOfDay(it) } ?: Long.MIN_VALUE
                     val end = customEndDate?.let { endOfDay(it) } ?: Long.MAX_VALUE
@@ -172,14 +172,9 @@ fun HomeScreen(
             val matchesSearch = if (query.isEmpty()) {
                 true
             } else {
-                try {
-                    t.description.contains(query, ignoreCase = true) ||
-                    t.category.contains(query, ignoreCase = true) ||
-                    t.amount.toLong().toString().contains(query) ||
-                    currencyFormat.format(t.amount).contains(query, ignoreCase = true)
-                } catch (e: Exception) {
-                    false
-                }
+                t.description.contains(query, ignoreCase = true) ||
+                t.category.contains(query, ignoreCase = true) ||
+                t.amount.toLong().toString().contains(query)
             }
 
             matchesType && matchesCategory && matchesDate && matchesSearch
@@ -2018,68 +2013,51 @@ fun TransactionItemWithSwipe(
         positionalThreshold = { distance -> distance * 0.5f }
     )
 
-    BoxWithConstraints {
-        val density = LocalDensity.current
-        val maxWidthPx = with(density) { maxWidth.toPx() }
-        val maxAllowedOffset = maxWidthPx * 0.66f
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val direction = dismissState.dismissDirection
+            val color = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> Color(0xFF2196F3) // Edit
+                SwipeToDismissBoxValue.EndToStart -> Color(0xFFD32F2F) // More vibrant red for Delete
+                else -> Color.Transparent
+            }
+            val alignment = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                else -> Alignment.Center
+            }
+            val icon = when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Edit
+                SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                else -> Icons.Default.Delete
+            }
 
-        SwipeToDismissBox(
-            state = dismissState,
-            backgroundContent = {
-                val direction = dismissState.dismissDirection
-                val color = when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFF2196F3) // Edit
-                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFD32F2F) // More vibrant red for Delete
-                    else -> Color.Transparent
-                }
-                val alignment = when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                    SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                    else -> Alignment.Center
-                }
-                val icon = when (direction) {
-                    SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Edit
-                    SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
-                    else -> Icons.Default.Delete
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = 1.5.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(color)
-                        .padding(horizontal = 20.dp),
-                    contentAlignment = alignment
-                ) {
-                    if (direction != SwipeToDismissBoxValue.Settled) {
-                        Icon(icon, contentDescription = null, tint = Color.White)
-                    }
-                }
-            },
-            content = {
-                val offset = try { dismissState.requireOffset() } catch (e: Exception) { 0f }
-                val counterOffset = when {
-                    offset > maxAllowedOffset -> -(offset - maxAllowedOffset)
-                    offset < -maxAllowedOffset -> -(offset + maxAllowedOffset)
-                    else -> 0f
-                }
-
-                Box(
-                    modifier = Modifier.offset { IntOffset(counterOffset.roundToInt(), 0) }
-                ) {
-                    TransactionCard(
-                        transaction = transaction, 
-                        currencyFormat = currencyFormat, 
-                        isDark = isDark,
-                        onEdit = onEdit,
-                        onDelete = onDelete,
-                        onViewDetail = onViewDetail
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 1.5.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(color)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = alignment
+            ) {
+                if (direction != SwipeToDismissBoxValue.Settled) {
+                    Icon(icon, contentDescription = null, tint = Color.White)
                 }
             }
-        )
-    }
+        },
+        content = {
+            TransactionCard(
+                transaction = transaction, 
+                currencyFormat = currencyFormat, 
+                isDark = isDark,
+                onEdit = onEdit,
+                onDelete = onDelete,
+                onViewDetail = onViewDetail
+            )
+        }
+    )
 }
 
 @Composable
@@ -2653,17 +2631,27 @@ private fun endOfDay(millis: Long): Long {
     return cal.timeInMillis
 }
 
-private fun isSameDay(m1: Long, m2: Long): Boolean {
-    val cal1 = Calendar.getInstance().apply { timeInMillis = m1 }
-    val cal2 = Calendar.getInstance().apply { timeInMillis = m2 }
-    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-           cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+private fun startOfMonth(millis: Long): Long {
+    val cal = Calendar.getInstance().apply {
+        timeInMillis = millis
+        set(Calendar.DAY_OF_MONTH, 1)
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+    return cal.timeInMillis
 }
 
-private fun isSameMonthAndYear(m1: Long, m2: Long): Boolean {
-    val cal1 = Calendar.getInstance().apply { timeInMillis = m1 }
-    val cal2 = Calendar.getInstance().apply { timeInMillis = m2 }
-    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-           cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
+private fun endOfMonth(millis: Long): Long {
+    val cal = Calendar.getInstance().apply {
+        timeInMillis = millis
+        set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE, 59)
+        set(Calendar.SECOND, 59)
+        set(Calendar.MILLISECOND, 999)
+    }
+    return cal.timeInMillis
 }
 
