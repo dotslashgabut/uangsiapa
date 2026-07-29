@@ -1,0 +1,36 @@
+Buku Keuangan: Sample Buku
+Tanggal,Kategori,Deskripsi,Debit (Pemasukan),Kredit (Pengeluaran),Saldo
+05/01/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,3000000.0
+08/01/2026 12.00,Belanja,Belanja Mingguan Supermarket,,150000.0,2850000.0
+15/01/2026 12.00,Makanan & Minuman,Makan Malam Bersama Keluarga,,85000.0,2765000.0
+20/01/2026 12.00,Transportasi,Bensin Motor Bulanan,,50000.0,2715000.0
+05/02/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,5715000.0
+06/02/2026 12.00,Sampingan,Penjualan Barang Bekas Online,250000.0,,5965000.0
+07/02/2026 12.00,Transportasi,Bensin dan Tol,,120000.0,5845000.0
+10/02/2026 12.00,Tagihan & Utilitas,Bayar Listrik dan Air,,450000.0,5395000.0
+18/02/2026 12.00,Kesehatan,Beli Vitamin & Obat,,200000.0,5195000.0
+05/03/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,8195000.0
+15/03/2026 12.00,Bonus,Bonus Proyek Sampingan,1200000.0,,9395000.0
+20/03/2026 12.00,Hiburan,Nonton Film & Rekreasi,,350000.0,9045000.0
+25/03/2026 12.00,Makanan & Minuman,Beli Kopi & Camilan Kantor,,180000.0,8865000.0
+28/03/2026 12.00,Pendidikan,Beli Buku & E-Course,,300000.0,8565000.0
+05/04/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,1.1565E7
+10/04/2026 12.00,Utang,Pinjam Uang ke Budi (Modal Usaha),1000000.0,,1.2565E7
+12/04/2026 12.00,Belanja,Beli Sepatu Baru,,250000.0,1.2315E7
+19/04/2026 12.00,Transportasi,Service Motor,,110000.0,1.2205E7
+24/04/2026 12.00,Sedekah,Infaq & Donasi Jumat,,150000.0,1.2055E7
+05/05/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,1.5055E7
+08/05/2026 12.00,Utang,Pinjaman Singkat Teman (Ahmad),500000.0,,1.5555E7
+10/05/2026 12.00,Tagihan & Utilitas,Paket Internet & TV Kabel,,500000.0,1.5055E7
+15/05/2026 12.00,Bayar Utang,Cicilan Utang Ke Budi (1/2),,350000.0,1.4705E7
+22/05/2026 12.00,Makanan & Minuman,Makan Siang Steak,,140000.0,1.4565E7
+05/06/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,1.7565E7
+10/06/2026 12.00,Penjualan,Penjualan Kerajinan Tangan,750000.0,,1.8315E7
+12/06/2026 12.00,Bayar Utang,Pelunasan Utang Ke Ahmad,,500000.0,1.7815E7
+14/06/2026 12.00,Belanja,Hadiah Ulang Tahun Teman,,300000.0,1.7515E7
+20/06/2026 12.00,Bayar Utang,Cicilan Utang Ke Budi (2/2),,350000.0,1.7165E7
+05/07/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,2.0165E7
+08/07/2026 12.00,Hadiah,Kado Hadiah dari Kakak,350000.0,,2.0515E7
+12/07/2026 12.00,Bayar Utang,Pelunasan Sisa Utang Budi,,300000.0,2.0215E7
+15/07/2026 12.00,Makanan & Minuman,Makan Bakso & Es Teh,,95000.0,2.012E7
+20/07/2026 12.00,Belanja,Belanja Sembako Bulanan,,220000.0,1.99E7

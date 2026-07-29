@@ -1,0 +1,308 @@
+[
+    {
+        "id": 34,
+        "type": "EXPENSE",
+        "amount": 220000,
+        "category": "Belanja",
+        "description": "Belanja Sembako Bulanan",
+        "dateMillis": 1784523600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 33,
+        "type": "EXPENSE",
+        "amount": 95000,
+        "category": "Makanan & Minuman",
+        "description": "Makan Bakso & Es Teh",
+        "dateMillis": 1784091600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 32,
+        "type": "EXPENSE",
+        "amount": 300000,
+        "category": "Bayar Utang",
+        "description": "Pelunasan Sisa Utang Budi",
+        "dateMillis": 1783832400000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 31,
+        "type": "INCOME",
+        "amount": 350000,
+        "category": "Hadiah",
+        "description": "Kado Hadiah dari Kakak",
+        "dateMillis": 1783486800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 30,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1783227600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 29,
+        "type": "EXPENSE",
+        "amount": 350000,
+        "category": "Bayar Utang",
+        "description": "Cicilan Utang Ke Budi (2\/2)",
+        "dateMillis": 1781931600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 28,
+        "type": "EXPENSE",
+        "amount": 300000,
+        "category": "Belanja",
+        "description": "Hadiah Ulang Tahun Teman",
+        "dateMillis": 1781413200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 27,
+        "type": "EXPENSE",
+        "amount": 500000,
+        "category": "Bayar Utang",
+        "description": "Pelunasan Utang Ke Ahmad",
+        "dateMillis": 1781240400000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 26,
+        "type": "INCOME",
+        "amount": 750000,
+        "category": "Penjualan",
+        "description": "Penjualan Kerajinan Tangan",
+        "dateMillis": 1781067600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 25,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1780635600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 24,
+        "type": "EXPENSE",
+        "amount": 140000,
+        "category": "Makanan & Minuman",
+        "description": "Makan Siang Steak",
+        "dateMillis": 1779426000000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 23,
+        "type": "EXPENSE",
+        "amount": 350000,
+        "category": "Bayar Utang",
+        "description": "Cicilan Utang Ke Budi (1\/2)",
+        "dateMillis": 1778821200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 22,
+        "type": "EXPENSE",
+        "amount": 500000,
+        "category": "Tagihan & Utilitas",
+        "description": "Paket Internet & TV Kabel",
+        "dateMillis": 1778389200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 21,
+        "type": "INCOME",
+        "amount": 500000,
+        "category": "Utang",
+        "description": "Pinjaman Singkat Teman (Ahmad)",
+        "dateMillis": 1778216400000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 20,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1777957200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 19,
+        "type": "EXPENSE",
+        "amount": 150000,
+        "category": "Sedekah",
+        "description": "Infaq & Donasi Jumat",
+        "dateMillis": 1777006800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 18,
+        "type": "EXPENSE",
+        "amount": 110000,
+        "category": "Transportasi",
+        "description": "Service Motor",
+        "dateMillis": 1776574800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 17,
+        "type": "EXPENSE",
+        "amount": 250000,
+        "category": "Belanja",
+        "description": "Beli Sepatu Baru",
+        "dateMillis": 1775970000000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 16,
+        "type": "INCOME",
+        "amount": 1000000,
+        "category": "Utang",
+        "description": "Pinjam Uang ke Budi (Modal Usaha)",
+        "dateMillis": 1775797200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 15,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1775365200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 14,
+        "type": "EXPENSE",
+        "amount": 300000,
+        "category": "Pendidikan",
+        "description": "Beli Buku & E-Course",
+        "dateMillis": 1774674000000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 13,
+        "type": "EXPENSE",
+        "amount": 180000,
+        "category": "Makanan & Minuman",
+        "description": "Beli Kopi & Camilan Kantor",
+        "dateMillis": 1774414800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 12,
+        "type": "EXPENSE",
+        "amount": 350000,
+        "category": "Hiburan",
+        "description": "Nonton Film & Rekreasi",
+        "dateMillis": 1773982800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 11,
+        "type": "INCOME",
+        "amount": 1200000,
+        "category": "Bonus",
+        "description": "Bonus Proyek Sampingan",
+        "dateMillis": 1773550800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 10,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1772686800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 9,
+        "type": "EXPENSE",
+        "amount": 200000,
+        "category": "Kesehatan",
+        "description": "Beli Vitamin & Obat",
+        "dateMillis": 1771390800000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 8,
+        "type": "EXPENSE",
+        "amount": 450000,
+        "category": "Tagihan & Utilitas",
+        "description": "Bayar Listrik dan Air",
+        "dateMillis": 1770699600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 7,
+        "type": "EXPENSE",
+        "amount": 120000,
+        "category": "Transportasi",
+        "description": "Bensin dan Tol",
+        "dateMillis": 1770440400000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 6,
+        "type": "INCOME",
+        "amount": 250000,
+        "category": "Sampingan",
+        "description": "Penjualan Barang Bekas Online",
+        "dateMillis": 1770354000000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 5,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1770267600000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 4,
+        "type": "EXPENSE",
+        "amount": 50000,
+        "category": "Transportasi",
+        "description": "Bensin Motor Bulanan",
+        "dateMillis": 1768885200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 3,
+        "type": "EXPENSE",
+        "amount": 85000,
+        "category": "Makanan & Minuman",
+        "description": "Makan Malam Bersama Keluarga",
+        "dateMillis": 1768453200000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 2,
+        "type": "EXPENSE",
+        "amount": 150000,
+        "category": "Belanja",
+        "description": "Belanja Mingguan Supermarket",
+        "dateMillis": 1767848400000,
+        "bookName": "Sample Buku"
+    },
+    {
+        "id": 1,
+        "type": "INCOME",
+        "amount": 3000000,
+        "category": "Gaji",
+        "description": "Gaji Bulanan Utama",
+        "dateMillis": 1767589200000,
+        "bookName": "Sample Buku"
+    }
+]

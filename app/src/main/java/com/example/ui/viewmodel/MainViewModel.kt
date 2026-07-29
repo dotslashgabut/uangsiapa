@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -32,7 +31,6 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
 
     val allTransactions: StateFlow<List<Transaction>> = _activeBook
         .filterNotNull()
-        .distinctUntilChangedBy { it.id }
         .flatMapLatest { book ->
             repository.getAllTransactions(book.id)
         }
@@ -47,9 +45,7 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
     init {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val defaultBook = repository.getDefaultBook()
-            if (_activeBook.value != defaultBook) {
-                _activeBook.value = defaultBook
-            }
+            _activeBook.value = defaultBook
         }
     }
 

@@ -1,0 +1,7 @@
+Buku Keuangan: Sample Buku
+Tanggal,Kategori,Deskripsi,Debit (Pemasukan),Kredit (Pengeluaran),Saldo
+05/07/2026 12.00,Gaji,Gaji Bulanan Utama,3000000.0,,3000000.0
+08/07/2026 12.00,Hadiah,Kado Hadiah dari Kakak,350000.0,,3350000.0
+12/07/2026 12.00,Bayar Utang,Pelunasan Sisa Utang Budi,,300000.0,3050000.0
+15/07/2026 12.00,Makanan & Minuman,Makan Bakso & Es Teh,,95000.0,2955000.0
+20/07/2026 12.00,Belanja,Belanja Sembako Bulanan,,220000.0,2735000.0

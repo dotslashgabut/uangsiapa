@@ -6,15 +6,77 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 
 ---
 
+<table align="center">
+  <tr>
+    <td><a href="./screenshots/00_dark.png" target="_blank"><img src="./screenshots/00_dark.png" width="200" /></a></td>
+    <td><a href="./screenshots/00_light.png" target="_blank"><img src="./screenshots/00_light.png" width="200" /></a></td>
+    <td><a href="./screenshots/00_new.png" target="_blank"><img src="./screenshots/00_new.png" width="200" /></a></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <td><a href="./screenshots/01.png" target="_blank"><img src="./screenshots/01.png" width="200" /></a></td>
+    <td><a href="./screenshots/02.png" target="_blank"><img src="./screenshots/02.png" width="200" /></a></td>
+    <td><a href="./screenshots/03.png" target="_blank"><img src="./screenshots/03.png" width="200" /></a></td>
+    <td><a href="./screenshots/04.png" target="_blank"><img src="./screenshots/04.png" width="200" /></a></td>
+    <td><a href="./screenshots/05.png" target="_blank"><img src="./screenshots/05.png" width="200" /></a></td>
+  </tr>
+  <tr>
+    <td><a href="./screenshots/06.png" target="_blank"><img src="./screenshots/06.png" width="200" /></a></td>
+    <td><a href="./screenshots/07.png" target="_blank"><img src="./screenshots/07.png" width="200" /></a></td>
+    <td><a href="./screenshots/08.png" target="_blank"><img src="./screenshots/08.png" width="200" /></a></td>
+    <td><a href="./screenshots/09.png" target="_blank"><img src="./screenshots/09.png" width="200" /></a></td>
+    <td><a href="./screenshots/10.png" target="_blank"><img src="./screenshots/10.png" width="200" /></a></td>
+  </tr>
+  <tr>
+    <td><a href="./screenshots/11.png" target="_blank"><img src="./screenshots/11.png" width="200" /></a></td>
+    <td><a href="./screenshots/12.png" target="_blank"><img src="./screenshots/12.png" width="200" /></a></td>
+    <td><a href="./screenshots/13.png" target="_blank"><img src="./screenshots/13.png" width="200" /></a></td>
+    <td><a href="./screenshots/14.png" target="_blank"><img src="./screenshots/14.png" width="200" /></a></td>
+    <td><a href="./screenshots/15.png" target="_blank"><img src="./screenshots/15.png" width="200" /></a></td>
+  </tr>
+  <tr>
+    <td><a href="./screenshots/16.png" target="_blank"><img src="./screenshots/16.png" width="200" /></a></td>
+    <td><a href="./screenshots/17.png" target="_blank"><img src="./screenshots/17.png" width="200" /></a></td>
+    <td><a href="./screenshots/18.png" target="_blank"><img src="./screenshots/18.png" width="200" /></a></td>
+    <td><a href="./screenshots/19.png" target="_blank"><img src="./screenshots/19.png" width="200" /></a></td>
+    <td><a href="./screenshots/20.png" target="_blank"><img src="./screenshots/20.png" width="200" /></a></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <td><a href="./screenshots/excel_bulanan_1.png" target="_blank"><img src="./screenshots/excel_bulanan_1.png" width="200" /></a></td>
+    <td><a href="./screenshots/excel_bulanan_2.png" target="_blank"><img src="./screenshots/excel_bulanan_2.png" width="200" /></a></td>
+    <td><a href="./screenshots/excel_tahunan_1.png" target="_blank"><img src="./screenshots/excel_tahunan_1.png" width="200" /></a></td>
+    <td><a href="./screenshots/excel_tahunan_2.png" target="_blank"><img src="./screenshots/excel_tahunan_2.png" width="200" /></a></td>
+  </tr>
+  <tr>
+    <td><a href="./screenshots/pdf_bulanan_1.jpg" target="_blank"><img src="./screenshots/pdf_bulanan_1.jpg" width="200" /></a></td>
+    <td><a href="./screenshots/pdf_bulanan_2.jpg" target="_blank"><img src="./screenshots/pdf_bulanan_2.jpg" width="200" /></a></td>
+    <td><a href="./screenshots/pdf_tahunan_1.jpg" target="_blank"><img src="./screenshots/pdf_tahunan_1.jpg" width="200" /></a></td>
+    <td><a href="./screenshots/pdf_tahunan_2.jpg" target="_blank"><img src="./screenshots/pdf_tahunan_2.jpg" width="200" /></a></td>
+  </tr>
+  <tr>
+    <td><a href="./screenshots/pdf_tahunan_3.jpg" target="_blank"><img src="./screenshots/pdf_tahunan_3.jpg" width="200" /></a></td>
+    <td><a href="./screenshots/csv_bulanan.png" target="_blank"><img src="./screenshots/csv_bulanan.png" width="200" /></a></td>
+    <td><a href="./screenshots/csv_tahunan.png" target="_blank"><img src="./screenshots/csv_tahunan.png" width="200" /></a></td>
+    <td><a href="./screenshots/backup_json.png" target="_blank"><img src="./screenshots/backup_json.png" width="200" /></a></td>
+  </tr>
+</table>
+
 ## 🌟 Fitur Utama (Versi Terbaru 1.1)
 
 ### 1. **Pencarian Data & Keterangan Interaktif**
+
 - **Kotak Pencarian Serbaguna & Kompak:** Mencakup pencarian seluruh teks transaksi (keterangan/deskripsi, nama kategori, hingga angka nominal rupiah) dengan desain ringkas dan nyaman dipandang.
 - **Tombol Hapus Teks Cepat:** Dilengkapi tombol ikon 'X' untuk menghapus kata kunci pencarian secara instan.
 - **Pembersihan Fokus Otomatis (Auto Keyboard Dismiss):** Kursor pencarian dan keyboard otomatis tertutup/nonaktif secara cerdas ketika pengguna melakukan ketukan (tap) di area luar kotak pencarian atau saat menggeser (scroll) daftar transaksi.
 - **Kombinasi Filter & Reset Total:** Dapat dikombinasikan dengan filter tipe transaksi (Masuk/Keluar), filter kategori, dan filter rentang tanggal. Tombol **Reset** secara otomatis menghapus seluruh filter aktif dan pencarian kata kunci sekaligus dalam satu klik.
 
 ### 2. **Mode View Detail & Penyesuaian Tampilan Baris Transaksi**
+
 - **Tampilan Detail Transaksi (Read-Only Mode):** Mengetuk/memilih baris transaksi kini membuka dialog rincian transaksi lengkap (nominal, kategori, waktu/tanggal, dan keterangan) untuk mencegah pengeditan yang tidak disengaja.
 - **Proporsi Baris Transaksi Ergonomis:** Ketinggian, padding, ukuran ikon, dan jarak teks pada daftar transaksi disesuaikan secara seimbang dan rapi agar mudah dibaca serta efisien dalam memanfaatkan ruang layar.
 - **Aksi Terbimbing & Tata Letak Ergonomis:** Dalam dialog rincian detail dan informasi aplikasi, tombol tutup ditempatkan sebagai ikon **'X'** di pojok kanan atas pop-up. Pada bagian bawah dialog rincian detail, tombol **Hapus** (merah) ditempatkan di sisi kiri dan tombol **Edit** (biru) di sisi kanan secara simetris untuk pemisahan aksi yang jelas.
@@ -27,6 +89,7 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Swipe Gesture:** Geser ke Kiri untuk Hapus, Geser ke Kanan untuk Edit.
 
 ### 3. **Filter & Pencarian Pintar**
+
 - **Filter Tipe Transaksi:** Saring transaksi berdasarkan "Semua", "Uang Masuk", atau "Uang Keluar".
 - **Filter Kategori Dinamis:** Saring transaksi berdasarkan kategori yang pernah dibuat secara otomatis.
 - **Tata Letak Konsisten & Responsif:** Dropdown tanggal, filter tipe, dan filter kategori disusun dalam proporsi grid yang seimbang.
@@ -34,15 +97,18 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Ringkasan Filter Aktif Presisi:** Menampilkan rekapitulasi data terfilter ("Masuk", "Keluar", dan "Selisih") secara instan ketika filter atau pencarian aktif.
 
 ### 4. **Optimasi Rotasi Lanskap & Display Cutout**
+
 - **Penanganan Orientasi Lanskap 180°:** Dukungan mode layout cutout `SHORT_EDGES` / `ALWAYS` dan penanganan `onConfigurationChanged` dinamis untuk memastikan tampilan aplikasi penuh tanpa terpotong atau menyisakan blok hitam pada rotasi landscape 90° maupun -90° di perangkat Android lama dan baru.
 - **Display Insets & Safe Drawing:** Penambahan `safeDrawing` insets pada `Scaffold` dan FAB untuk kenyamanan navigasi.
 
 ### 5. **Laporan Bulanan & Tahunan Interaktif**
+
 - **Ringkasan Visual Bulanan:** Grafik batang minimalis membandingkan total pemasukan dan pengeluaran bulan berjalan.
 - **Ringkasan Visual Tahunan:** Grafik komparatif 12 bulan penuh (Januari-Desember) untuk analisis tren keuangan jangka panjang.
 - **Analisis Persentase Kategori:** Breakdown persentase kontribusi per kategori dengan indikator progres bar warna-warni.
 
 ### 6. **Ekspor Laporan Profesional & Rekapitulasi Excel**
+
 - **Penamaan File Ekspor Cerdas:** File hasil ekspor (`.pdf`, `.xlsx`, `.csv`) kini otomatis menyertakan nama bulan & tahun (misal `laporan_bulanan_Juli_2026_BukuUtama_...`) atau nama tahun (misal `laporan_tahunan_2026_BukuUtama_...`) sesuai dengan tab laporan yang aktif saat diekspor.
 - **PDF Export Berwarna:** Hasilkan dokumen PDF resmi dengan judul dinamis `Laporan Keuangan Bulan [Bulan/Tahun]` atau `Laporan Keuangan Tahun [Tahun]`.
 - **Grafik Visual PDF:** Ekspor laporan tahunan otomatis menyertakan visualisasi grafik batang 12 bulan penuh.
@@ -51,6 +117,7 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Sheet Rekapitulasi Bulanan & Tahunan Excel:** Lembar rekap harian per kategori (`"Rekap Juli 2026"`) dan rekap matriks tahunan (`"Rekap Tahun 2026"`).
 
 ### 7. **Opsi Ekspor & Impor Backup JSON (Spesifik Buku & Multi-Buku)**
+
 - **Opsi Ekspor Backup Spesifik di Menu Titik Tiga:**
   - **Ekspor Backup (Buku Ini):** Mengekspor khusus data transaksi pada buku keuangan yang sedang aktif.
   - **Ekspor Backup (Semua Buku):** Mengekspor seluruh data transaksi dari seluruh buku keuangan sekaligus ke dalam satu file JSON.
@@ -58,6 +125,7 @@ Aplikasi pencatatan keuangan pribadi modern berbasis Android yang dirancang untu
 - **Pencegahan Nama Buku Duplikat (Case-Insensitive):** Otomatis menambahkan sufiks angka ` (1)`, ` (2)` jika ditemukan konflik nama buku.
 
 ### 8. **Tema Gelap & Terang Dinamis & Optimasi Lanskap**
+
 - **Gradient Total Saldo Premium:** Kotak ringkasan total saldo utama kini dibalut dengan gradasi warna linear (gradient) 3-stop yang modern, sangat estetik, dan nyaman di mata:
   - **Light Mode:** Gradasi pastel premium sejuk yang mengalir lembut dari warna biru-indigo chic, lavender lembut, hingga sentuhan rose-pink hangat.
   - **Dark Mode:** Gradasi kosmik nebula mewah yang memadukan warna violet berpendar, indigo pekat, hingga transisi abu-abu gelap metalik yang menyatu dengan latar belakang gelap.
@@ -112,6 +180,7 @@ Aplikasi ini dibangun menggunakan praktik pengembangan Android modern:
 Aplikasi ini menggunakan sistem build Gradle Kotlin DSL.
 
 1. **Prasyarat:**
+   
    - Gunakan JDK 17 atau yang lebih baru.
    - Gunakan Android Studio Jellyfish / Koala atau versi terbaru.
 
@@ -119,5 +188,6 @@ Aplikasi ini menggunakan sistem build Gradle Kotlin DSL.
    Buka direktori proyek ini di Android Studio, tunggu sinkronisasi Gradle selesai, lalu tekan tombol **Run** untuk menginstalnya ke perangkat emulator atau perangkat fisik Anda.
 
 3. **Gunakan Laporan Ekspor & Backup:**
+   
    - Ketika menekan ikon Ekspor PDF/Excel/CSV di halaman Laporan, aplikasi akan menghasilkan file dengan nama periode aktif (Bulan-Tahun) secara instan dan membuka chooser sistem untuk membagikannya via email, WhatsApp, cloud drive, dll.
    - Gunakan menu titik tiga di layar utama untuk mengekspor backup JSON per-buku aktif atau semua buku sekaligus.
