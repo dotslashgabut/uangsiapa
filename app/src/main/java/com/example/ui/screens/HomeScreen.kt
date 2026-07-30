@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -372,10 +373,11 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
-                    })
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    focusManager.clearFocus()
                 }
         ) {
             LazyColumn(
@@ -1471,12 +1473,34 @@ fun HomeScreen(
                 )
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                val dialogFocusManager = LocalFocusManager.current
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            dialogFocusManager.clearFocus()
+                        }
+                ) {
                     OutlinedTextField(
                         value = bookNameInput,
                         onValueChange = { bookNameInput = it },
                         label = { Text("Nama Buku") },
                         singleLine = true,
+                        trailingIcon = if (bookNameInput.isNotEmpty()) {
+                            {
+                                IconButton(onClick = { bookNameInput = "" }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Hapus nama buku",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        } else null,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -1547,12 +1571,33 @@ fun HomeScreen(
                 )
             },
             text = {
-                Column {
+                val dialogFocusManager = LocalFocusManager.current
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            dialogFocusManager.clearFocus()
+                        }
+                ) {
                     OutlinedTextField(
                         value = bookNameInput,
                         onValueChange = { bookNameInput = it },
                         label = { Text("Nama Buku") },
                         singleLine = true,
+                        trailingIcon = if (bookNameInput.isNotEmpty()) {
+                            {
+                                IconButton(onClick = { bookNameInput = "" }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Hapus nama buku",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        } else null,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -2001,35 +2046,76 @@ fun TransactionItemWithSwipe(
     currencyFormat: NumberFormat,
     isDark: Boolean
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { dismissValue ->
-            when (dismissValue) {
-                SwipeToDismissBoxValue.EndToStart -> {
-                    onDelete()
-                    false
+    key(transaction.id) {
+        val dismissState = rememberSwipeToDismissBoxState(
+            confirmValueChange = { dismissValue ->
+                when (dismissValue) {
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        onDelete()
+                        false
+                    }
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        onEdit()
+                        false
+                    }
+                    else -> false
                 }
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onEdit()
-                    false
-                }
-                else -> false
-            }
-        },
-        positionalThreshold = { distance -> distance * 0.5f }
-    )
+            },
+            positionalThreshold = { distance -> distance * 0.35f }
+        )
 
-    BoxWithConstraints {
-        val density = LocalDensity.current
-        val maxWidthPx = with(density) { maxWidth.toPx() }
-        val maxAllowedOffset = maxWidthPx * 0.66f
+        LaunchedEffect(dismissState.targetValue) {
+            if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) {
+                dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+            }
+        }
+
+        val editQuotes = remember {
+            listOf(
+                "Ubah data, asal jgn ubah perasaan 💙",
+                "Edit sikit biar rapi ya bestie ✨",
+                "Revisi dikit ga ngaruh~ 📝",
+                "Perbaiki catatan, perbaiki hidup 😇",
+                "Cek lagi, siapa tau typo 🔍",
+                "Edit nominal biar ga jantungan 💸",
+                "Kerja keras boleh, burnout jangan bro ☕",
+                "Hargai dirimu, lo udah berjuang hebat 🌟",
+                "Istirahat sejenak, lo bukan robot 🤖",
+                "Hargai usaha orang, nawar jgn sadis 🙏",
+                "Siram tanaman biar adem hatimu 🌱",
+                "Bawa tumbler sendiri, hemat + ramah bumi 🌿"
+            )
+        }
+
+        val deleteQuotes = remember {
+            listOf(
+                "Jangan jajan mulu, bang! 🛑",
+                "Rajin-rajinlah nabung! 🪙",
+                "Hapus jejak dosa keuangan 💸",
+                "Dompet menangis, mental meringis 😭",
+                "Inget cicilan, bestie~ 💔",
+                "Self reward secukupnya aja bro! 🛑",
+                "Kurang-kurangin checkout olshop 🛒",
+                "Rem dikit lah jajannya bro! 🚨",
+                "Hemat pangkal kaya, jajan pangkal bokek 😭",
+                "Meringankan dompet demi pakan anabul 🐱🐶",
+                "Gaji numpang lewat kyk angin lalu 💨",
+                "Traktir temen pas gajian bawa berkah 🤝",
+                "Sedekah ke anabul jalanan bikin rezeki lancar 🐾",
+                "Kurangi sampah plastik, jaga bumi kita 🌎",
+                "Tidur cukup juga investasi masa depan 💤"
+            )
+        }
 
         SwipeToDismissBox(
             state = dismissState,
+            enableDismissFromStartToEnd = true,
+            enableDismissFromEndToStart = true,
             backgroundContent = {
                 val direction = dismissState.dismissDirection
                 val color = when (direction) {
                     SwipeToDismissBoxValue.StartToEnd -> Color(0xFF2196F3) // Edit
-                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFD32F2F) // More vibrant red for Delete
+                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFD32F2F) // Delete
                     else -> Color.Transparent
                 }
                 val alignment = when (direction) {
@@ -2043,6 +2129,14 @@ fun TransactionItemWithSwipe(
                     else -> Icons.Default.Delete
                 }
 
+                val currentQuote = remember(transaction.id, direction) {
+                    when (direction) {
+                        SwipeToDismissBoxValue.StartToEnd -> editQuotes.random()
+                        SwipeToDismissBoxValue.EndToStart -> deleteQuotes.random()
+                        else -> ""
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -2053,30 +2147,42 @@ fun TransactionItemWithSwipe(
                     contentAlignment = alignment
                 ) {
                     if (direction != SwipeToDismissBoxValue.Settled) {
-                        Icon(icon, contentDescription = null, tint = Color.White)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (direction == SwipeToDismissBoxValue.StartToEnd) {
+                                Icon(icon, contentDescription = null, tint = Color.White)
+                                Text(
+                                    text = currentQuote,
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1
+                                )
+                            } else {
+                                Text(
+                                    text = currentQuote,
+                                    color = Color.White,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1
+                                )
+                                Icon(icon, contentDescription = null, tint = Color.White)
+                            }
+                        }
                     }
                 }
             },
             content = {
-                val offset = try { dismissState.requireOffset() } catch (e: Exception) { 0f }
-                val counterOffset = when {
-                    offset > maxAllowedOffset -> -(offset - maxAllowedOffset)
-                    offset < -maxAllowedOffset -> -(offset + maxAllowedOffset)
-                    else -> 0f
-                }
-
-                Box(
-                    modifier = Modifier.offset { IntOffset(counterOffset.roundToInt(), 0) }
-                ) {
-                    TransactionCard(
-                        transaction = transaction, 
-                        currencyFormat = currencyFormat, 
-                        isDark = isDark,
-                        onEdit = onEdit,
-                        onDelete = onDelete,
-                        onViewDetail = onViewDetail
-                    )
-                }
+                TransactionCard(
+                    transaction = transaction, 
+                    currencyFormat = currencyFormat, 
+                    isDark = isDark,
+                    onEdit = onEdit,
+                    onDelete = onDelete,
+                    onViewDetail = onViewDetail
+                )
             }
         )
     }

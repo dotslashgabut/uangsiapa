@@ -25,6 +25,10 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,6 +62,7 @@ fun AddEditScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val dateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID"))
     val isDark = MaterialTheme.colorScheme.background == DarkBackground
 
@@ -97,39 +102,16 @@ fun AddEditScreen(
         }
     ) { paddingValues ->
         val scrollState = rememberScrollState()
-        val coroutineScope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 12.dp)
                 .verticalScroll(scrollState)
-                .pointerInput(scrollState) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            if (event.type == PointerEventType.Scroll) {
-                                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
-                                if (delta != 0f) {
-                                    coroutineScope.launch {
-                                        scrollState.scrollBy(delta * 120f)
-                                    }
-                                }
-                            } else if (event.type == PointerEventType.Move) {
-                                val change = event.changes.firstOrNull()
-                                if (change != null && change.pressed) {
-                                    val currentY = change.position.y
-                                    val previousY = change.previousPosition.y
-                                    val deltaY = previousY - currentY
-                                    if (deltaY != 0f) {
-                                        coroutineScope.launch {
-                                            scrollState.scrollBy(deltaY)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
                 },
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -268,6 +250,17 @@ fun AddEditScreen(
                                 }
                             ) 
                         },
+                        trailingIcon = if (uiState.amountStr.isNotEmpty()) {
+                            {
+                                IconButton(onClick = { viewModel.updateAmount("") }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Hapus nominal",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        } else null,
                         textStyle = LocalTextStyle.current.copy(
                             fontSize = 24.sp, 
                             fontWeight = FontWeight.Bold,
@@ -337,11 +330,22 @@ fun AddEditScreen(
                             Icon(Icons.Default.Label, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                         },
                         trailingIcon = {
-                            IconButton(onClick = { showCategoryDropdown = !showCategoryDropdown }) {
-                                Icon(
-                                    imageVector = if (showCategoryDropdown) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                    contentDescription = "Pilih Kategori"
-                                )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (uiState.category.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.updateCategory("") }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Hapus kategori",
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                                IconButton(onClick = { showCategoryDropdown = !showCategoryDropdown }) {
+                                    Icon(
+                                        imageVector = if (showCategoryDropdown) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                        contentDescription = "Pilih Kategori"
+                                    )
+                                }
                             }
                         },
                         shape = RoundedCornerShape(16.dp)
@@ -374,6 +378,17 @@ fun AddEditScreen(
                 leadingIcon = {
                     Icon(Icons.Default.EditNote, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 },
+                trailingIcon = if (uiState.description.isNotEmpty()) {
+                    {
+                        IconButton(onClick = { viewModel.updateDescription("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Hapus keterangan",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                } else null,
                 minLines = 2,
                 shape = RoundedCornerShape(16.dp)
             )
