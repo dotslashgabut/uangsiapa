@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,12 +118,12 @@ fun HomeScreen(
     var showMenu by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
 
-    var selectedTypeFilter by remember { mutableStateOf<TransactionType?>(null) }
-    var selectedCategoryFilter by remember { mutableStateOf<String>("Semua") }
-    var selectedDateFilterType by remember { mutableStateOf<DateFilterType>(DateFilterType.ALL) }
-    var customStartDate by remember { mutableStateOf<Long?>(null) }
-    var customEndDate by remember { mutableStateOf<Long?>(null) }
-    var searchQuery by remember { mutableStateOf("") }
+    var selectedTypeFilter by rememberSaveable { mutableStateOf<TransactionType?>(null) }
+    var selectedCategoryFilter by rememberSaveable { mutableStateOf<String>("Semua") }
+    var selectedDateFilterType by rememberSaveable { mutableStateOf<DateFilterType>(DateFilterType.ALL) }
+    var customStartDate by rememberSaveable { mutableStateOf<Long?>(null) }
+    var customEndDate by rememberSaveable { mutableStateOf<Long?>(null) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     
     var showTypeMenu by remember { mutableStateOf(false) }
     var showCategoryMenu by remember { mutableStateOf(false) }
@@ -134,12 +135,6 @@ fun HomeScreen(
 
     val availableCategories = remember(transactions) {
         transactions.map { it.category.trim() }.filter { it.isNotEmpty() }.distinct().sorted()
-    }
-
-    LaunchedEffect(availableCategories) {
-        if (selectedCategoryFilter != "Semua" && !availableCategories.contains(selectedCategoryFilter)) {
-            selectedCategoryFilter = "Semua"
-        }
     }
 
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("id", "ID")).apply { maximumFractionDigits = 0 } }
@@ -1136,7 +1131,9 @@ fun HomeScreen(
             },
             text = {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
@@ -1657,7 +1654,9 @@ fun HomeScreen(
             },
             text = {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
@@ -1793,6 +1792,7 @@ fun HomeScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                         .padding(vertical = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
@@ -2444,6 +2444,7 @@ fun TransactionDetailDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {

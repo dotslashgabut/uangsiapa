@@ -228,7 +228,8 @@ class MainViewModel(private val repository: TransactionRepository) : ViewModel()
                     createDummyTx(TransactionType.INCOME, 350000.0, "Hadiah", "Kado Hadiah dari Kakak", 2026, java.util.Calendar.JULY, 8, newId),
                     createDummyTx(TransactionType.EXPENSE, 300000.0, "Bayar Utang", "Pelunasan Sisa Utang Budi", 2026, java.util.Calendar.JULY, 12, newId),
                     createDummyTx(TransactionType.EXPENSE, 95000.0, "Makanan & Minuman", "Makan Bakso & Es Teh", 2026, java.util.Calendar.JULY, 15, newId),
-                    createDummyTx(TransactionType.EXPENSE, 220000.0, "Belanja", "Belanja Sembako Bulanan", 2026, java.util.Calendar.JULY, 20, newId)
+                    createDummyTx(TransactionType.EXPENSE, 220000.0, "Belanja", "Belanja Sembako Bulanan", 2026, java.util.Calendar.JULY, 20, newId),
+                    createDummyTx(TransactionType.INCOME, 845826.0, "Celengan", "Celengan ayam sejak 81 tahun lalu", 2026, java.util.Calendar.JULY, 28, newId)
                 )
                 
                 for (t in dummyTransactions) {
